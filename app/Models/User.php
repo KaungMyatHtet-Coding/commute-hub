@@ -25,6 +25,7 @@ class User extends Authenticatable
         'driver_license_number',
         'driver_license_document_path',
         'driver_verification_status',
+        'driver_rejection_reason',
         'driver_applied_at',
         'driver_verified_at',
         'driver_verified_by',

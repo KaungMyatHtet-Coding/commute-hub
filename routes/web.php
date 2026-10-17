@@ -49,9 +49,21 @@ Route::middleware('auth')->group(function () {
     // My Trips (dual driver/passenger trips view)
     Route::get('/trips', [\App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
 
+    // Driver application (passenger view)
+    Route::get('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'create'])->name('driver-application.create');
+    Route::post('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'store'])->name('driver-application.store');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Admin routes protected by auth and Spatie role:admin middleware
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    Route::get('/verifications', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'index'])->name('verifications.index');
+    Route::patch('/verifications/{user}/approve', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'approve'])->name('verifications.approve');
+    Route::patch('/verifications/{user}/reject', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'reject'])->name('verifications.reject');
 });
 
 

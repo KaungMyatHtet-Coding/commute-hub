@@ -34,7 +34,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user()
                     ? array_merge(
-                        $request->user()->only(['id', 'name', 'email']),
+                        $request->user()->only([
+                            'id',
+                            'name',
+                            'email',
+                            'driver_verification_status',
+                            'driver_rejection_reason',
+                        ]),
                         // Spatie role names, e.g. ['driver'] or ['passenger']
                         ['roles' => $request->user()->getRoleNames()->values()->all()]
                     )

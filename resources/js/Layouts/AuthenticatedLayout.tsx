@@ -17,6 +17,7 @@ export default function Authenticated({
     const hasRole = (role: string) => user?.roles?.includes(role) ?? false;
 
     const isDriver = hasRole('driver');
+    const isAdmin = hasRole('admin');
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -48,7 +49,6 @@ export default function Authenticated({
                                 </NavLink>
 
                                 {/* Find a Ride — all authenticated users */}
-                                {/* Only show when the route exists (rides.index will be added later) */}
                                 {route().has('rides.index') && (
                                     <NavLink
                                         href={route('rides.index')}
@@ -94,10 +94,10 @@ export default function Authenticated({
                                         </span>
                                     </NavLink>
                                 ) : (
-                                    /* Passenger: nudge towards becoming a driver */
+                                    /* Passenger: Become a driver application */
                                     <NavLink
-                                        href={route('profile.edit')}
-                                        active={false}
+                                        href={route('driver-application.create')}
+                                        active={route().current('driver-application.*')}
                                         className="hidden lg:inline-flex"
                                     >
                                         <span className="flex items-center gap-1.5 text-indigo-600">
@@ -118,12 +118,42 @@ export default function Authenticated({
                                         </span>
                                     </NavLink>
                                 )}
+
+                                {/* Admin Portal Link */}
+                                {isAdmin && (
+                                    <NavLink
+                                        href={route('admin.dashboard')}
+                                        active={route().current('admin.*')}
+                                    >
+                                        <span className="flex items-center gap-1.5 text-purple-700 font-semibold">
+                                            <svg
+                                                className="h-4 w-4 text-purple-600"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeWidth={2}
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
+                                                />
+                                            </svg>
+                                            Admin Panel
+                                        </span>
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
                         {/* ── Right: User dropdown ── */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center">
                             {/* Role badge */}
+                            {isAdmin && (
+                                <span className="me-2 inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200">
+                                    Admin
+                                </span>
+                            )}
                             {isDriver && (
                                 <span className="me-3 inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
                                     Driver
@@ -159,14 +189,23 @@ export default function Authenticated({
                                         <Dropdown.Link href={route('profile.edit')}>
                                             Profile
                                         </Dropdown.Link>
+                                        {isAdmin && (
+                                            <Dropdown.Link href={route('admin.dashboard')}>
+                                                Admin Panel
+                                            </Dropdown.Link>
+                                        )}
                                         {route().has('bookings.index') && (
                                             <Dropdown.Link href={route('bookings.index')}>
                                                 My Trips
                                             </Dropdown.Link>
                                         )}
-                                        {isDriver && (
+                                        {isDriver ? (
                                             <Dropdown.Link href={route('rides.create')}>
                                                 Offer a Ride
+                                            </Dropdown.Link>
+                                        ) : (
+                                            <Dropdown.Link href={route('driver-application.create')}>
+                                                Become a Driver
                                             </Dropdown.Link>
                                         )}
                                         <Dropdown.Link
@@ -240,6 +279,15 @@ export default function Authenticated({
                             Dashboard
                         </ResponsiveNavLink>
 
+                        {isAdmin && (
+                            <ResponsiveNavLink
+                                href={route('admin.dashboard')}
+                                active={route().current('admin.*')}
+                            >
+                                Admin Panel
+                            </ResponsiveNavLink>
+                        )}
+
                         {route().has('rides.index') && (
                             <ResponsiveNavLink
                                 href={route('rides.index')}
@@ -261,7 +309,6 @@ export default function Authenticated({
                             </ResponsiveNavLink>
                         )}
 
-
                         {isDriver ? (
                             <ResponsiveNavLink
                                 href={route('rides.create')}
@@ -271,8 +318,8 @@ export default function Authenticated({
                             </ResponsiveNavLink>
                         ) : (
                             <ResponsiveNavLink
-                                href={route('profile.edit')}
-                                active={false}
+                                href={route('driver-application.create')}
+                                active={route().current('driver-application.*')}
                             >
                                 Become a Driver
                             </ResponsiveNavLink>
@@ -286,6 +333,11 @@ export default function Authenticated({
                                 <div className="text-base font-medium text-gray-800">
                                     {user.name}
                                 </div>
+                                {isAdmin && (
+                                    <span className="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200">
+                                        Admin
+                                    </span>
+                                )}
                                 {isDriver && (
                                     <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
                                         Driver

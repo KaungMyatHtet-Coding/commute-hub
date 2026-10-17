@@ -140,6 +140,7 @@ export default function Dashboard() {
     const { auth, stats, recentBookings, activeRide } = usePage<PageProps<DashboardProps>>().props;
     const user = auth.user;
     const isDriver = user?.roles?.includes('driver') ?? false;
+    const isAdmin = user?.roles?.includes('admin') ?? false;
 
     const cards: ActionCard[] = [
         ...(route().has('rides.index')
@@ -168,7 +169,7 @@ export default function Dashboard() {
             : [{
                 title: 'Become a Driver',
                 description: 'Register your vehicle and start offering rides to other commuters.',
-                href: route('profile.edit'),
+                href: route('driver-application.create'),
                 label: 'Apply Now',
                 icon: <UserCheckIcon />,
                 gradient: 'from-violet-500 to-purple-500',
@@ -185,6 +186,22 @@ export default function Dashboard() {
             ring: 'ring-emerald-100',
             labelColor: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-300',
         },
+        ...(isAdmin
+            ? [{
+                title: 'Admin Panel',
+                description: 'Manage driver verifications and monitor platform metrics.',
+                href: route('admin.dashboard'),
+                label: 'Open Admin',
+                icon: (
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                    </svg>
+                ),
+                gradient: 'from-purple-600 to-indigo-600',
+                ring: 'ring-purple-100',
+                labelColor: 'bg-purple-600 hover:bg-purple-700 focus:ring-purple-300',
+            }]
+            : []),
     ];
 
     return (

@@ -3,6 +3,8 @@ export interface User {
     name: string;
     email: string;
     email_verified_at?: string;
+    driver_verification_status?: 'not_applied' | 'pending' | 'pending_verification' | 'verified' | 'rejected' | string;
+    driver_rejection_reason?: string | null;
     roles: string[];
 }
 
