@@ -2,7 +2,37 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 
-// ─── Quick-action card definition ────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface RecentBooking {
+    id: number;
+    ride_id?: number;
+    passenger_id?: number;
+    status: string;
+    seats_booked: number;
+    price_per_seat: string;
+    passenger?: { id: number; name: string } | null;
+    ride?: {
+        id?: number;
+        driver_id?: number;
+        departure_time?: string;
+        driver?: { id?: number; name: string } | null;
+        vehicle?: { make: string; model: string; color?: string | null } | null;
+        stops?: { id: number; stop_name: string; stop_order: number }[];
+    } | null;
+    pickupStop?: { stop_name: string } | null;
+    dropoffStop?: { stop_name: string } | null;
+}
+
+
+type DashboardProps = {
+    stats: {
+        rides_taken: number;
+        rides_offered: number;
+    };
+    recentBookings: RecentBooking[];
+};
+
 
 interface ActionCard {
     title: string;
@@ -13,8 +43,26 @@ interface ActionCard {
     gradient: string;
     ring: string;
     labelColor: string;
-    /** Render as a plain anchor when the route isn't registered yet */
     disabled?: boolean;
+}
+
+// ─── Status badge ─────────────────────────────────────────────────────────────
+
+const STATUS_STYLES: Record<string, string> = {
+    pending:   'bg-amber-100 text-amber-800 ring-amber-200',
+    accepted:  'bg-emerald-100 text-emerald-800 ring-emerald-200',
+    completed: 'bg-blue-100 text-blue-800 ring-blue-200',
+    rejected:  'bg-red-100 text-red-800 ring-red-200',
+    cancelled: 'bg-gray-100 text-gray-600 ring-gray-200',
+};
+
+function StatusBadge({ status }: { status: string }) {
+    const cls = STATUS_STYLES[status] ?? 'bg-gray-100 text-gray-600 ring-gray-200';
+    return (
+        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset ${cls}`}>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
+    );
 }
 
 // ─── Icon helpers ─────────────────────────────────────────────────────────────
@@ -68,59 +116,60 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
     );
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatDateTime(iso: string): string {
+    return new Date(iso).toLocaleString([], {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+    });
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-    const { auth } = usePage<PageProps>().props;
+    const { auth, stats, recentBookings } = usePage<PageProps<DashboardProps>>().props;
     const user = auth.user;
-
     const isDriver = user?.roles?.includes('driver') ?? false;
 
-    // Build action cards based on role.
     const cards: ActionCard[] = [
         ...(route().has('rides.index')
-            ? [
-                  {
-                      title: 'Find a Ride',
-                      description: 'Browse available carpooling trips near you and book a seat.',
-                      href: route('rides.index'),
-                      label: 'Browse Rides',
-                      icon: <SearchIcon />,
-                      gradient: 'from-sky-500 to-cyan-500',
-                      ring: 'ring-sky-100',
-                      labelColor: 'bg-sky-600 hover:bg-sky-700 focus:ring-sky-300',
-                  },
-              ]
+            ? [{
+                title: 'Find a Ride',
+                description: 'Browse available carpooling trips near you and book a seat.',
+                href: route('rides.index'),
+                label: 'Browse Rides',
+                icon: <SearchIcon />,
+                gradient: 'from-sky-500 to-cyan-500',
+                ring: 'ring-sky-100',
+                labelColor: 'bg-sky-600 hover:bg-sky-700 focus:ring-sky-300',
+            }]
             : []),
         ...(isDriver
-            ? [
-                  {
-                      title: 'Offer a Ride',
-                      description: 'Post a new trip, set your route and available seats.',
-                      href: route('rides.create'),
-                      label: 'Post a Ride',
-                      icon: <CarIcon />,
-                      gradient: 'from-indigo-500 to-violet-500',
-                      ring: 'ring-indigo-100',
-                      labelColor: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-300',
-                  },
-              ]
-            : [
-                  {
-                      title: 'Become a Driver',
-                      description: 'Register your vehicle and start offering rides to other commuters.',
-                      href: route('profile.edit'),
-                      label: 'Apply Now',
-                      icon: <UserCheckIcon />,
-                      gradient: 'from-violet-500 to-purple-500',
-                      ring: 'ring-violet-100',
-                      labelColor: 'bg-violet-600 hover:bg-violet-700 focus:ring-violet-300',
-                  },
-              ]),
+            ? [{
+                title: 'Offer a Ride',
+                description: 'Post a new trip, set your route and available seats.',
+                href: route('rides.create'),
+                label: 'Post a Ride',
+                icon: <CarIcon />,
+                gradient: 'from-indigo-500 to-violet-500',
+                ring: 'ring-indigo-100',
+                labelColor: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-300',
+            }]
+            : [{
+                title: 'Become a Driver',
+                description: 'Register your vehicle and start offering rides to other commuters.',
+                href: route('profile.edit'),
+                label: 'Apply Now',
+                icon: <UserCheckIcon />,
+                gradient: 'from-violet-500 to-purple-500',
+                ring: 'ring-violet-100',
+                labelColor: 'bg-violet-600 hover:bg-violet-700 focus:ring-violet-300',
+            }]),
         {
             title: 'My Trips',
             description: 'View your past and upcoming rides as a passenger or driver.',
-            href: route('profile.edit'),   // swap to rides.history once that route exists
+            href: route().has('bookings.index') ? route('bookings.index') : route('profile.edit'),
             label: 'View History',
             icon: <HistoryIcon />,
             gradient: 'from-emerald-500 to-teal-500',
@@ -135,13 +184,10 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800">
-                            Welcome back,{' '}
-                            <span className="text-indigo-600">{user.name}</span> 👋
+                            Welcome back, <span className="text-indigo-600">{user.name}</span> 👋
                         </h2>
                         <p className="mt-0.5 text-sm text-gray-500">
-                            {isDriver
-                                ? 'Ready to offer a ride today?'
-                                : 'Find your next commute partner.'}
+                            {isDriver ? 'Ready to offer a ride today?' : 'Find your next commute partner.'}
                         </p>
                     </div>
                     {isDriver && (
@@ -162,61 +208,36 @@ export default function Dashboard() {
 
                     {/* ── Stats row ── */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        <StatCard label="Rides Taken" value="—" color="text-sky-600" />
-                        <StatCard label="Rides Offered" value={isDriver ? '—' : 'N/A'} color="text-indigo-600" />
+                        <StatCard label="Rides Taken" value={stats?.rides_taken ?? '—'} color="text-sky-600" />
+                        <StatCard label="Rides Offered" value={isDriver ? (stats?.rides_offered ?? '—') : 'N/A'} color="text-indigo-600" />
                         <StatCard label="CO₂ Saved" value="—" color="text-emerald-600" />
                         <StatCard label="Total Savings" value="—" color="text-amber-600" />
                     </div>
 
                     {/* ── Quick action cards ── */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
-                            Quick Actions
-                        </h3>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">Quick Actions</h3>
                         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {cards.map((card) => (
                                 <div
                                     key={card.title}
                                     className={`group relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.ring}`}
                                 >
-                                    {/* Gradient accent bar */}
-                                    <div
-                                        className={`h-1.5 w-full bg-gradient-to-r ${card.gradient}`}
-                                    />
-
+                                    <div className={`h-1.5 w-full bg-gradient-to-r ${card.gradient}`} />
                                     <div className="p-6">
-                                        {/* Icon */}
-                                        <div
-                                            className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${card.gradient} text-white shadow-md`}
-                                        >
+                                        <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${card.gradient} text-white shadow-md`}>
                                             {card.icon}
                                         </div>
-
-                                        <h4 className="text-base font-bold text-gray-800">
-                                            {card.title}
-                                        </h4>
-                                        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
-                                            {card.description}
-                                        </p>
-
+                                        <h4 className="text-base font-bold text-gray-800">{card.title}</h4>
+                                        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{card.description}</p>
                                         <div className="mt-5">
                                             <Link
                                                 href={card.href}
                                                 className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${card.labelColor}`}
                                             >
                                                 {card.label}
-                                                <svg
-                                                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth={2.5}
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        d="M13 7l5 5-5 5M6 12h12"
-                                                    />
+                                                <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
                                                 </svg>
                                             </Link>
                                         </div>
@@ -226,21 +247,107 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* ── Placeholder recent activity ── */}
+                    {/* ── Recent activity ── */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
-                            Recent Activity
-                        </h3>
-                        <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
-                            <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-300">
-                                <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">Recent Activity</h3>
+                        {recentBookings && recentBookings.length > 0 ? (
+                            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
+                                <ul className="divide-y divide-gray-100">
+                                    {recentBookings.map((booking) => {
+                                        const rideId = booking.ride_id || booking.ride?.id;
+                                        const isDriverForRide = Boolean(
+                                            user && booking.ride?.driver_id && Number(user.id) === Number(booking.ride.driver_id)
+                                        );
+
+                                        const pickupName = booking.pickupStop?.stop_name
+                                            || booking.ride?.stops?.[0]?.stop_name
+                                            || 'Origin';
+                                        const dropoffName = booking.dropoffStop?.stop_name
+                                            || (booking.ride?.stops && booking.ride.stops.length > 1
+                                                ? booking.ride.stops[booking.ride.stops.length - 1].stop_name
+                                                : 'Destination');
+
+                                        const content = (
+                                            <div className="flex items-center gap-4 px-5 py-4 transition hover:bg-gray-50/80">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <StatusBadge status={booking.status} />
+                                                        <span className="text-sm font-medium text-gray-800 truncate">
+                                                            {isDriverForRide ? (
+                                                                <>
+                                                                    <span className="font-semibold text-indigo-600">Passenger:</span>{' '}
+                                                                    {booking.passenger?.name ?? 'Passenger'}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    {booking.ride?.driver?.name ?? 'Driver'} ·{' '}
+                                                                    {booking.ride?.vehicle
+                                                                        ? `${booking.ride.vehicle.make} ${booking.ride.vehicle.model}`
+                                                                        : 'Vehicle N/A'}
+                                                                </>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
+                                                        <span className="font-medium text-gray-700">{pickupName}</span>
+                                                        <span className="text-gray-400">→</span>
+                                                        <span className="font-medium text-gray-700">{dropoffName}</span>
+                                                        <span className="text-gray-300">·</span>
+                                                        <span>
+                                                            {booking.ride?.departure_time
+                                                                ? formatDateTime(booking.ride.departure_time)
+                                                                : '—'}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="shrink-0 text-right">
+                                                    <p className="text-sm font-semibold text-gray-900">
+                                                        ${(Number(booking.price_per_seat) * booking.seats_booked).toFixed(2)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400">{booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''}</p>
+                                                </div>
+                                                <div className="shrink-0 text-gray-400">
+                                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        );
+
+                                        return (
+                                            <li key={booking.id}>
+                                                {rideId ? (
+                                                    <Link href={route('rides.show', rideId)} className="block">
+                                                        {content}
+                                                    </Link>
+                                                ) : (
+                                                    content
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                                {route().has('bookings.index') && (
+                                    <div className="border-t border-gray-100 px-5 py-3">
+                                        <Link href={route('bookings.index')} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                                            View all trips →
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
-                            <p className="text-sm font-medium text-gray-400">No recent activity yet</p>
-                            <p className="mt-1 text-xs text-gray-300">Your upcoming and past rides will appear here.</p>
-                        </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
+                                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-300">
+                                    <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">No recent activity yet</p>
+                                <p className="mt-1 text-xs text-gray-300">Your upcoming and past rides will appear here.</p>
+                            </div>
+                        )}
                     </div>
+
                 </div>
             </div>
         </AuthenticatedLayout>

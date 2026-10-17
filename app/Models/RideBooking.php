@@ -13,8 +13,18 @@ class RideBooking extends Model
 
     protected function casts(): array
     {
-        return ['price_per_seat' => 'decimal:2', 'accepted_at' => 'datetime', 'cancelled_at' => 'datetime'];
+        return [
+            'ride_id' => 'integer',
+            'passenger_id' => 'integer',
+            'pickup_stop_id' => 'integer',
+            'dropoff_stop_id' => 'integer',
+            'seats_booked' => 'integer',
+            'price_per_seat' => 'decimal:2',
+            'accepted_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+        ];
     }
+
 
     public function ride()
     {

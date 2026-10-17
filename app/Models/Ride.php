@@ -13,8 +13,16 @@ class Ride extends Model
 
     protected function casts(): array
     {
-        return ['departure_time' => 'datetime', 'price_per_seat' => 'decimal:2'];
+        return [
+            'driver_id' => 'integer',
+            'vehicle_id' => 'integer',
+            'total_seats' => 'integer',
+            'available_seats' => 'integer',
+            'departure_time' => 'datetime',
+            'price_per_seat' => 'decimal:2',
+        ];
     }
+
 
     public function driver()
     {

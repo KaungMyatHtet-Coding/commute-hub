@@ -1,5 +1,6 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
+import FlashToast from '@/Components/FlashToast';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
@@ -22,6 +23,7 @@ export default function Authenticated({
 
     return (
         <div className="min-h-screen bg-gray-100">
+            <FlashToast />
             <nav className="border-b border-gray-100 bg-white shadow-sm">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
@@ -56,6 +58,15 @@ export default function Authenticated({
                                         }
                                     >
                                         Find a Ride
+                                    </NavLink>
+                                )}
+
+                                {route().has('bookings.index') && (
+                                    <NavLink
+                                        href={route('bookings.index')}
+                                        active={route().current('bookings.index')}
+                                    >
+                                        My Trips
                                     </NavLink>
                                 )}
 
@@ -148,6 +159,11 @@ export default function Authenticated({
                                         <Dropdown.Link href={route('profile.edit')}>
                                             Profile
                                         </Dropdown.Link>
+                                        {route().has('bookings.index') && (
+                                            <Dropdown.Link href={route('bookings.index')}>
+                                                My Trips
+                                            </Dropdown.Link>
+                                        )}
                                         {isDriver && (
                                             <Dropdown.Link href={route('rides.create')}>
                                                 Offer a Ride
@@ -235,6 +251,16 @@ export default function Authenticated({
                                 Find a Ride
                             </ResponsiveNavLink>
                         )}
+
+                        {route().has('bookings.index') && (
+                            <ResponsiveNavLink
+                                href={route('bookings.index')}
+                                active={route().current('bookings.index')}
+                            >
+                                My Trips
+                            </ResponsiveNavLink>
+                        )}
+
 
                         {isDriver ? (
                             <ResponsiveNavLink

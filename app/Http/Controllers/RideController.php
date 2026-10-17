@@ -64,8 +64,9 @@ class RideController extends Controller
 
     /**
      * Show a single ride's details.
+     * Also loads passenger bookings when the viewer is the driver.
      */
-    public function show(Ride $ride): Response
+    public function show(Request $request, Ride $ride): Response
     {
         $ride->load([
             'driver:id,name,email',
@@ -73,9 +74,39 @@ class RideController extends Controller
             'stops' => fn ($q) => $q->orderBy('stop_order'),
         ]);
 
+        $isDriver = (int) $request->user()->id === (int) $ride->driver_id;
+
+
+        // If the logged-in user is a passenger, fetch their existing booking on this ride (if any)
+        $existingBooking = ! $isDriver
+            ? $ride->bookings()
+                ->where('passenger_id', $request->user()->id)
+                ->with([
+                    'pickupStop:id,stop_name',
+                    'dropoffStop:id,stop_name',
+                ])
+                ->first()
+            : null;
+
+        // Load bookings only for the driver — avoids leaking passenger data to others.
+        $bookings = $isDriver
+            ? $ride->bookings()
+                ->with([
+                    'passenger:id,name,email',
+                    'pickupStop:id,stop_name',
+                    'dropoffStop:id,stop_name',
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get()
+            : collect();
+
         return Inertia::render('Rides/Show', [
-            'ride' => $ride,
+            'ride'            => $ride,
+            'isDriver'        => $isDriver,
+            'bookings'        => $bookings,
+            'existingBooking' => $existingBooking,
         ]);
+
     }
 
     /**

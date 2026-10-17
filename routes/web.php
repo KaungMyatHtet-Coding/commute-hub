@@ -16,9 +16,9 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', App\Http\Controllers\DashboardController::class)
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     // Ride discovery (all authenticated users)
@@ -35,6 +35,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/rides/{ride}/bookings', [RideBookingController::class, 'store'])->name('rides.bookings.store');
     Route::patch('/bookings/{booking}/accept', [RideBookingController::class, 'accept'])->name('bookings.accept');
     Route::patch('/bookings/{booking}/cancel', [RideBookingController::class, 'cancel'])->name('bookings.cancel');
+
+    // My Trips (passenger)
+    Route::get('/trips', [App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
+
+    // Booking reject (new)
+    Route::patch('/bookings/{booking}/reject', [App\Http\Controllers\RideBookingController::class, 'reject'])->name('bookings.reject');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
