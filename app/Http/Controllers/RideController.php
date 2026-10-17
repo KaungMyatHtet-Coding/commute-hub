@@ -4,14 +4,80 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRideRequest;
 use App\Models\Ride;
+use App\Models\RideStop;
 use App\Models\Vehicle;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RideController extends Controller
 {
+    /**
+     * List available rides with optional filters.
+     */
+    public function index(Request $request): Response
+    {
+        $query = Ride::query()
+            ->with([
+                'driver:id,name',
+                'vehicle:id,make,model,color,license_plate',
+                'stops' => fn ($q) => $q->orderBy('stop_order'),
+            ])
+            ->where('status', 'scheduled')
+            ->where('available_seats', '>', 0)
+            ->where('departure_time', '>', now());
+
+        // Filter: pickup stop name
+        if ($request->filled('pickup')) {
+            $pickup = $request->string('pickup')->trim()->value();
+            $query->whereHas('stops', fn ($q) => $q->where('stop_name', 'like', "%{$pickup}%"));
+        }
+
+        // Filter: dropoff stop name
+        if ($request->filled('dropoff')) {
+            $dropoff = $request->string('dropoff')->trim()->value();
+            $query->whereHas('stops', fn ($q) => $q->where('stop_name', 'like', "%{$dropoff}%"));
+        }
+
+        // Filter: departure date (YYYY-MM-DD)
+        if ($request->filled('date')) {
+            $query->whereDate('departure_time', $request->input('date'));
+        }
+
+        $rides = $query->orderBy('departure_time')->paginate(15)->withQueryString();
+
+        // Collect distinct stop names for autocomplete hints
+        $stopNames = RideStop::query()
+            ->select('stop_name')
+            ->distinct()
+            ->orderBy('stop_name')
+            ->pluck('stop_name');
+
+        return Inertia::render('Rides/Index', [
+            'rides'     => $rides,
+            'stopNames' => $stopNames,
+            'filters'   => $request->only(['pickup', 'dropoff', 'date']),
+        ]);
+    }
+
+    /**
+     * Show a single ride's details.
+     */
+    public function show(Ride $ride): Response
+    {
+        $ride->load([
+            'driver:id,name,email',
+            'vehicle:id,make,model,color,license_plate,seat_capacity',
+            'stops' => fn ($q) => $q->orderBy('stop_order'),
+        ]);
+
+        return Inertia::render('Rides/Show', [
+            'ride' => $ride,
+        ]);
+    }
+
     /**
      * Show the "Offer a Ride" creation form.
      * Only drivers with at least one active vehicle can access this.
@@ -37,7 +103,7 @@ class RideController extends Controller
     {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated, $request) {
+        $ride = DB::transaction(function () use ($validated, $request) {
             /** @var Vehicle $vehicle */
             $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
 
@@ -63,12 +129,15 @@ class RideController extends Controller
                     'updated_at'     => now(),
                 ], $validated['stops']);
 
-                \App\Models\RideStop::insert($stops);
+                RideStop::insert($stops);
             }
+
+            return $ride;
         });
 
         return redirect()
-            ->route('dashboard')
+            ->route('rides.show', $ride)
             ->with('success', 'Your ride has been posted successfully!');
     }
 }
+

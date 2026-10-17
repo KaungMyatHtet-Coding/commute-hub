@@ -21,9 +21,15 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    // Ride management
+    // Ride discovery (all authenticated users)
+    Route::get('/rides', [RideController::class, 'index'])->name('rides.index');
+
+    // Ride management (drivers) — must be before /{ride} wildcard
     Route::get('/rides/create', [RideController::class, 'create'])->name('rides.create');
     Route::post('/rides', [RideController::class, 'store'])->name('rides.store');
+
+    // Ride detail — wildcard last so "create" isn't swallowed
+    Route::get('/rides/{ride}', [RideController::class, 'show'])->name('rides.show');
 
     // Booking management
     Route::post('/rides/{ride}/bookings', [RideBookingController::class, 'store'])->name('rides.bookings.store');
@@ -34,5 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
 
 require __DIR__.'/auth.php';
