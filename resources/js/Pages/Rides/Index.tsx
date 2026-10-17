@@ -14,6 +14,8 @@ interface RideStop {
 interface RideDriver {
     id: number;
     name: string;
+    average_rating?: number | string | null;
+    reviews_received_count?: number;
 }
 
 interface RideVehicle {
@@ -103,10 +105,21 @@ function RideCard({ ride }: { ride: Ride }) {
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <p className="text-sm font-medium text-gray-500">Driver</p>
-                    <p className="font-semibold text-gray-900 group-hover:text-indigo-600">
-                        {ride.driver.name}
-                    </p>
-                    <p className="text-xs text-gray-400">
+                    <div className="flex items-center gap-2">
+                        <p className="font-semibold text-gray-900 group-hover:text-indigo-600">
+                            {ride.driver.name}
+                        </p>
+                        {ride.driver.average_rating ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                ★ {Number(ride.driver.average_rating).toFixed(1)}
+                            </span>
+                        ) : (
+                            <span className="rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500">
+                                New Driver
+                            </span>
+                        )}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">
                         {ride.vehicle.make} {ride.vehicle.model}
                         {ride.vehicle.color ? ` · ${ride.vehicle.color}` : ''}
                     </p>

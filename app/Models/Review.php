@@ -11,6 +11,16 @@ class Review extends Model
 
     protected $fillable = ['booking_id', 'reviewer_id', 'reviewee_id', 'rating', 'comment'];
 
+    protected function casts(): array
+    {
+        return [
+            'booking_id' => 'integer',
+            'reviewer_id' => 'integer',
+            'reviewee_id' => 'integer',
+            'rating' => 'integer',
+        ];
+    }
+
     public function booking()
     {
         return $this->belongsTo(RideBooking::class);

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { PageProps } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -29,8 +29,17 @@ type DashboardProps = {
     stats: {
         rides_taken: number;
         rides_offered: number;
+        average_rating?: number;
+        review_count?: number;
     };
     recentBookings: RecentBooking[];
+    activeRide?: {
+        id: number;
+        status: string;
+        departure_time: string;
+        vehicle?: { make: string; model: string } | null;
+        stops?: { id: number; stop_name: string }[];
+    } | null;
 };
 
 
@@ -128,7 +137,7 @@ function formatDateTime(iso: string): string {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Dashboard() {
-    const { auth, stats, recentBookings } = usePage<PageProps<DashboardProps>>().props;
+    const { auth, stats, recentBookings, activeRide } = usePage<PageProps<DashboardProps>>().props;
     const user = auth.user;
     const isDriver = user?.roles?.includes('driver') ?? false;
 
@@ -210,9 +219,77 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                         <StatCard label="Rides Taken" value={stats?.rides_taken ?? '—'} color="text-sky-600" />
                         <StatCard label="Rides Offered" value={isDriver ? (stats?.rides_offered ?? '—') : 'N/A'} color="text-indigo-600" />
-                        <StatCard label="CO₂ Saved" value="—" color="text-emerald-600" />
-                        <StatCard label="Total Savings" value="—" color="text-amber-600" />
+                        <StatCard
+                            label="Rating"
+                            value={stats?.average_rating && stats.average_rating > 0 ? `★ ${stats.average_rating}` : '★ New'}
+                            color="text-amber-500"
+                        />
+                        <StatCard label="Reviews" value={stats?.review_count ?? 0} color="text-emerald-600" />
                     </div>
+
+                    {/* ── Active Ride Action Banner (Driver) ── */}
+                    {activeRide && (
+                        <div className="overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-indigo-100">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                            Active Driving Trip
+                                        </span>
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                                activeRide.status === 'in_progress'
+                                                    ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-300'
+                                                    : 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-300'
+                                            }`}
+                                        >
+                                            {activeRide.status === 'in_progress' && (
+                                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+                                            )}
+                                            {activeRide.status === 'in_progress' ? 'In Progress' : 'Scheduled'}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 font-bold text-gray-900">
+                                        {activeRide.stops?.[0]?.stop_name ?? 'Origin'} → {activeRide.stops && activeRide.stops.length > 1 ? activeRide.stops[activeRide.stops.length - 1].stop_name : 'Destination'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">
+                                        {activeRide.vehicle ? `${activeRide.vehicle.make} ${activeRide.vehicle.model}` : 'Vehicle'} · {formatDateTime(activeRide.departure_time)}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                    {activeRide.status === 'scheduled' && (
+                                        <button
+                                            onClick={() => {
+                                                if (!confirm('Start this trip now?')) return;
+                                                router.patch(route('rides.start', activeRide.id), {}, { preserveScroll: true });
+                                            }}
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                                        >
+                                            Start Trip
+                                        </button>
+                                    )}
+                                    {activeRide.status === 'in_progress' && (
+                                        <button
+                                            onClick={() => {
+                                                if (!confirm('Complete this trip?')) return;
+                                                router.patch(route('rides.complete', activeRide.id), {}, { preserveScroll: true });
+                                            }}
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                        >
+                                            Complete Trip
+                                        </button>
+                                    )}
+                                    <Link
+                                        href={route('rides.show', activeRide.id)}
+                                        className="rounded-xl border border-gray-300 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+                                    >
+                                        View Trip
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* ── Quick action cards ── */}
                     <div>

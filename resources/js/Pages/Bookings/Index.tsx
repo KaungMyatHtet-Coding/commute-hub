@@ -1,6 +1,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import CancelModal from '@/Components/CancelModal';
+import ReviewModal from '@/Components/ReviewModal';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import type { PageProps } from '@/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -23,12 +26,22 @@ interface RideVehicle {
     license_plate: string;
 }
 
+interface Review {
+    id: number;
+    booking_id: number;
+    reviewer_id: number;
+    reviewee_id: number;
+    rating: number;
+    comment?: string | null;
+}
+
 interface Ride {
     id: number;
     departure_time?: string;
     price_per_seat: string;
     available_seats: number;
-    status: string;
+    status: string; // 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
+    cancellation_reason?: string | null;
     driver?: RideDriver | null;
     vehicle?: RideVehicle | null;
     stops?: RideStop[];
@@ -36,14 +49,16 @@ interface Ride {
 
 interface Booking {
     id: number;
-    status: string;
+    status: string; // 'pending' | 'accepted' | 'completed' | 'cancelled' | 'cancelled_by_driver' | 'rejected'
     seats_booked: number;
     price_per_seat: string;
     accepted_at: string | null;
     cancelled_at: string | null;
+    cancellation_reason?: string | null;
     ride: Ride;
     pickupStop: RideStop | null;
     dropoffStop: RideStop | null;
+    reviews?: Review[];
 }
 
 interface OfferedRide {
@@ -53,8 +68,9 @@ interface OfferedRide {
     total_seats: number;
     available_seats: number;
     price_per_seat: string;
-    status: string;
+    status: string; // 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
     notes?: string | null;
+    cancellation_reason?: string | null;
     pending_bookings_count?: number;
     accepted_bookings_count?: number;
     vehicle?: RideVehicle | null;
@@ -64,10 +80,11 @@ interface OfferedRide {
         status: string;
         seats_booked: number;
         passenger?: { id: number; name: string; email: string };
+        reviews?: Review[];
     }>;
 }
 
-interface Props {
+interface Props extends PageProps {
     upcoming: Booking[];
     past: Booking[];
     offeredRides?: OfferedRide[];
@@ -76,19 +93,23 @@ interface Props {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-    pending:   'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-    accepted:  'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-    completed: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-    rejected:  'bg-red-100 text-red-800 ring-1 ring-red-200',
-    cancelled: 'bg-gray-100 text-gray-600 ring-1 ring-gray-200',
+    pending:             'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
+    accepted:            'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
+    in_progress:         'bg-blue-100 text-blue-800 ring-1 ring-blue-300',
+    completed:           'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
+    rejected:            'bg-red-100 text-red-800 ring-1 ring-red-200',
+    cancelled:           'bg-gray-100 text-gray-600 ring-1 ring-gray-200',
+    cancelled_by_driver: 'bg-red-100 text-red-700 ring-1 ring-red-200',
 };
 
 const STATUS_LABELS: Record<string, string> = {
-    pending:   'Pending',
-    accepted:  'Confirmed',
-    completed: 'Completed',
-    rejected:  'Rejected',
-    cancelled: 'Cancelled',
+    pending:             'Pending',
+    accepted:            'Confirmed',
+    in_progress:         'In Progress',
+    completed:           'Completed',
+    rejected:            'Rejected',
+    cancelled:           'Cancelled',
+    cancelled_by_driver: 'Cancelled by Driver',
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -115,7 +136,17 @@ function formatTime(iso: string | null): string {
 
 // ─── Offered Ride Card (Driver view) ──────────────────────────────────────────
 
-function OfferedRideCard({ ride }: { ride: OfferedRide }) {
+function OfferedRideCard({
+    ride,
+    onStartRide,
+    onCompleteRide,
+    onCancelRide,
+}: {
+    ride: OfferedRide;
+    onStartRide: (ride: OfferedRide) => void;
+    onCompleteRide: (ride: OfferedRide) => void;
+    onCancelRide: (ride: OfferedRide) => void;
+}) {
     const isFree = Number(ride.price_per_seat) === 0;
     const pendingCount = ride.pending_bookings_count ?? 0;
     const bookedSeats = ride.total_seats - ride.available_seats;
@@ -127,7 +158,13 @@ function OfferedRideCard({ ride }: { ride: OfferedRide }) {
     return (
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
             {/* Status bar */}
-            <div className={`h-1.5 w-full ${pendingCount > 0 ? 'bg-amber-400' : 'bg-indigo-600'}`} />
+            <div className={`h-1.5 w-full ${
+                ride.status === 'in_progress' ? 'bg-blue-500' :
+                ride.status === 'completed'   ? 'bg-emerald-500' :
+                ride.status === 'cancelled'   ? 'bg-red-400' :
+                pendingCount > 0              ? 'bg-amber-400' :
+                'bg-indigo-600'
+            }`} />
 
             <div className="p-5">
                 {/* Header */}
@@ -137,14 +174,11 @@ function OfferedRideCard({ ride }: { ride: OfferedRide }) {
                             <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
                                 Driving
                             </span>
-                            {pendingCount > 0 ? (
+                            <StatusBadge status={ride.status} />
+                            {pendingCount > 0 && ride.status === 'scheduled' && (
                                 <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
                                     <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
                                     {pendingCount} Pending Request{pendingCount !== 1 ? 's' : ''}
-                                </span>
-                            ) : (
-                                <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 ring-1 ring-gray-200">
-                                    0 Pending Requests
                                 </span>
                             )}
                         </div>
@@ -198,16 +232,48 @@ function OfferedRideCard({ ride }: { ride: OfferedRide }) {
                     {ride.departure_time ? formatDateTime(ride.departure_time) : '—'}
                 </div>
 
+                {/* Cancellation Reason if cancelled */}
+                {ride.cancellation_reason && (
+                    <div className="mt-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-700">
+                        <span className="font-semibold">Cancelled: </span>
+                        {ride.cancellation_reason}
+                    </div>
+                )}
+
                 {/* Actions */}
-                <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-                    <span className="text-xs text-gray-500">
-                        {bookedSeats} seat{bookedSeats !== 1 ? 's' : ''} reserved
-                    </span>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4">
+                    <div className="flex items-center gap-2">
+                        {ride.status === 'scheduled' && (
+                            <>
+                                <button
+                                    onClick={() => onStartRide(ride)}
+                                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                                >
+                                    Start Trip
+                                </button>
+                                <button
+                                    onClick={() => onCancelRide(ride)}
+                                    className="rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                >
+                                    Cancel
+                                </button>
+                            </>
+                        )}
+                        {ride.status === 'in_progress' && (
+                            <button
+                                onClick={() => onCompleteRide(ride)}
+                                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                            >
+                                Complete Trip
+                            </button>
+                        )}
+                    </div>
+
                     <Link
                         href={route('rides.show', ride.id)}
-                        className="rounded-lg bg-indigo-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition ms-auto"
                     >
-                        Manage Bookings & View Ride
+                        Manage & View Ride
                     </Link>
                 </div>
             </div>
@@ -217,16 +283,26 @@ function OfferedRideCard({ ride }: { ride: OfferedRide }) {
 
 // ─── Booking Card (Passenger view) ────────────────────────────────────────────
 
-function BookingCard({ booking }: { booking: Booking }) {
+function BookingCard({
+    booking,
+    currentUserId,
+    onCancelBooking,
+    onReviewBooking,
+}: {
+    booking: Booking;
+    currentUserId: number;
+    onCancelBooking: (booking: Booking) => void;
+    onReviewBooking: (booking: Booking) => void;
+}) {
     const totalFare = (Number(booking.price_per_seat) * booking.seats_booked).toFixed(2);
     const isFree = Number(booking.price_per_seat) === 0;
 
-    function handleCancel() {
-        if (!confirm('Cancel this booking?')) return;
-        router.patch(route('bookings.cancel', booking.id), {}, {
-            preserveScroll: true,
-        });
-    }
+    const isCompleted = booking.status === 'completed' || booking.ride?.status === 'completed';
+    const isCancelled = booking.status === 'cancelled' || booking.status === 'cancelled_by_driver';
+
+    const myReview = booking.reviews?.find(
+        (r) => Number(r.reviewer_id) === Number(currentUserId),
+    );
 
     const pickupName = booking.pickupStop?.stop_name 
         || booking.ride?.stops?.[0]?.stop_name 
@@ -238,10 +314,11 @@ function BookingCard({ booking }: { booking: Booking }) {
         <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
             {/* Status bar */}
             <div className={`h-1.5 w-full ${
+                isCompleted                   ? 'bg-blue-500' :
                 booking.status === 'accepted' ? 'bg-emerald-500' :
                 booking.status === 'pending'  ? 'bg-amber-400' :
-                booking.status === 'rejected' ? 'bg-red-400' :
-                'bg-gray-300'
+                isCancelled                   ? 'bg-gray-400' :
+                'bg-red-400'
             }`} />
 
             <div className="p-5">
@@ -313,33 +390,66 @@ function BookingCard({ booking }: { booking: Booking }) {
                         : '—'}
                 </div>
 
-                {/* Actions */}
-                <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-4">
-                    {booking.ride?.id && (
-                        <Link
-                            href={route('rides.show', booking.ride.id)}
-                            className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                        >
-                            View Ride
-                        </Link>
-                    )}
+                {/* Reason note if cancelled */}
+                {booking.cancellation_reason && (
+                    <div className="mt-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-700">
+                        <span className="font-semibold">Reason: </span>
+                        {booking.cancellation_reason}
+                    </div>
+                )}
 
-                    {['pending', 'accepted'].includes(booking.status) && (
-                        <button
-                            onClick={handleCancel}
-                            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                        >
-                            Cancel Booking
-                        </button>
-                    )}
+                {/* Actions */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4">
+                    <div className="flex items-center gap-2">
+                        {booking.ride?.id && (
+                            <Link
+                                href={route('rides.show', booking.ride.id)}
+                                className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                            >
+                                View Ride
+                            </Link>
+                        )}
+
+                        {/* Review option on completed trips */}
+                        {isCompleted && (
+                            myReview ? (
+                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                    ★ {myReview.rating} Reviewed
+                                </span>
+                            ) : (
+                                <button
+                                    onClick={() => onReviewBooking(booking)}
+                                    className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 transition"
+                                >
+                                    Leave a Review
+                                </button>
+                            )
+                        )}
+
+                        {/* Cancel button before trip is in progress/completed */}
+                        {['pending', 'accepted'].includes(booking.status) && booking.ride?.status !== 'in_progress' && booking.ride?.status !== 'completed' && (
+                            <button
+                                onClick={() => onCancelBooking(booking)}
+                                className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                            >
+                                Cancel Booking
+                            </button>
+                        )}
+                    </div>
+
                     {booking.status === 'pending' && (
-                        <p className="ms-auto text-xs text-amber-600 italic">
+                        <p className="text-xs text-amber-600 italic">
                             Awaiting driver approval…
                         </p>
                     )}
                     {booking.status === 'rejected' && (
-                        <p className="ms-auto text-xs text-red-500 italic">
+                        <p className="text-xs text-red-500 italic">
                             Driver declined this request.
+                        </p>
+                    )}
+                    {booking.status === 'cancelled_by_driver' && (
+                        <p className="text-xs text-red-500 italic">
+                            Driver cancelled this trip.
                         </p>
                     )}
                 </div>
@@ -351,13 +461,85 @@ function BookingCard({ booking }: { booking: Booking }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function BookingsIndex({ upcoming = [], past = [], offeredRides = [] }: Props) {
+    const { auth } = usePage<Props>().props;
     const hasOfferedRides = offeredRides.length > 0;
     const [mainView, setMainView] = useState<'offering' | 'riding'>(
         hasOfferedRides ? 'offering' : 'riding',
     );
     const [passengerTab, setPassengerTab] = useState<'upcoming' | 'past'>('upcoming');
 
+    // Modal state
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [cancelTargetType, setCancelTargetType] = useState<'booking' | 'ride'>('booking');
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [selectedRide, setSelectedRide] = useState<OfferedRide | null>(null);
+
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewTargetBooking, setReviewTargetBooking] = useState<Booking | null>(null);
+
     const totalPassengerCount = upcoming.length + past.length;
+
+    // ── Driver Trip Lifecycle Actions ──
+    function handleStartRide(ride: OfferedRide) {
+        if (!confirm('Start this trip now? Cancellations will be locked once in progress.')) return;
+        router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+    }
+
+    function handleCompleteRide(ride: OfferedRide) {
+        if (!confirm('Complete this trip? All accepted passenger bookings will be marked completed.')) return;
+        router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+    }
+
+    function handleOpenCancelRide(ride: OfferedRide) {
+        setSelectedRide(ride);
+        setCancelTargetType('ride');
+        setCancelModalOpen(true);
+    }
+
+    function handleOpenCancelBooking(booking: Booking) {
+        setSelectedBooking(booking);
+        setCancelTargetType('booking');
+        setCancelModalOpen(true);
+    }
+
+    function handleConfirmCancellation(reason: string) {
+        if (cancelTargetType === 'ride' && selectedRide) {
+            router.patch(
+                route('rides.cancel', selectedRide.id),
+                { reason },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => setCancelModalOpen(false),
+                },
+            );
+        } else if (cancelTargetType === 'booking' && selectedBooking) {
+            router.patch(
+                route('bookings.cancel', selectedBooking.id),
+                { reason },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => setCancelModalOpen(false),
+                },
+            );
+        }
+    }
+
+    function handleOpenReview(booking: Booking) {
+        setReviewTargetBooking(booking);
+        setReviewModalOpen(true);
+    }
+
+    function handleSubmitReview(rating: number, comment: string) {
+        if (!reviewTargetBooking) return;
+        router.post(
+            route('bookings.reviews.store', reviewTargetBooking.id),
+            { rating, comment },
+            {
+                preserveScroll: true,
+                onSuccess: () => setReviewModalOpen(false),
+            },
+        );
+    }
 
     return (
         <AuthenticatedLayout
@@ -440,7 +622,13 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                         ) : (
                             <div className="grid gap-5 sm:grid-cols-2">
                                 {offeredRides.map((ride) => (
-                                    <OfferedRideCard key={ride.id} ride={ride} />
+                                    <OfferedRideCard
+                                        key={ride.id}
+                                        ride={ride}
+                                        onStartRide={handleStartRide}
+                                        onCompleteRide={handleCompleteRide}
+                                        onCancelRide={handleOpenCancelRide}
+                                    />
                                 ))}
                             </div>
                         )
@@ -478,7 +666,15 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                                     />
                                 ) : (
                                     <div className="grid gap-5 sm:grid-cols-2">
-                                        {upcoming.map((b) => <BookingCard key={b.id} booking={b} />)}
+                                        {upcoming.map((b) => (
+                                            <BookingCard
+                                                key={b.id}
+                                                booking={b}
+                                                currentUserId={auth.user.id}
+                                                onCancelBooking={handleOpenCancelBooking}
+                                                onReviewBooking={handleOpenReview}
+                                            />
+                                        ))}
                                     </div>
                                 )
                             )}
@@ -488,7 +684,15 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                                     <EmptyState message="No past trips" sub="Completed trips will appear here." />
                                 ) : (
                                     <div className="grid gap-5 sm:grid-cols-2">
-                                        {past.map((b) => <BookingCard key={b.id} booking={b} />)}
+                                        {past.map((b) => (
+                                            <BookingCard
+                                                key={b.id}
+                                                booking={b}
+                                                currentUserId={auth.user.id}
+                                                onCancelBooking={handleOpenCancelBooking}
+                                                onReviewBooking={handleOpenReview}
+                                            />
+                                        ))}
                                     </div>
                                 )
                             )}
@@ -497,6 +701,34 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
 
                 </div>
             </div>
+
+            {/* ── Cancellation Modal ── */}
+            <CancelModal
+                isOpen={cancelModalOpen}
+                title={cancelTargetType === 'ride' ? 'Cancel Entire Trip' : 'Cancel Booking'}
+                description={
+                    cancelTargetType === 'ride'
+                        ? 'Cancelling this ride will immediately notify all booked passengers and restore availability.'
+                        : 'Are you sure you want to cancel your seat reservation?'
+                }
+                isReasonRequired={cancelTargetType === 'ride'}
+                reasonPlaceholder={
+                    cancelTargetType === 'ride'
+                        ? 'e.g., Vehicle issue, emergency, schedule conflict…'
+                        : 'e.g., Plans changed, found another ride…'
+                }
+                onClose={() => setCancelModalOpen(false)}
+                onConfirm={handleConfirmCancellation}
+            />
+
+            {/* ── Review Modal ── */}
+            <ReviewModal
+                isOpen={reviewModalOpen}
+                targetName={reviewTargetBooking?.ride?.driver?.name ?? 'Driver'}
+                roleLabel="Driver"
+                onClose={() => setReviewModalOpen(false)}
+                onSubmit={handleSubmitReview}
+            />
         </AuthenticatedLayout>
     );
 }

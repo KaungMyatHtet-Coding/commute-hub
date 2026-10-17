@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import CancelModal from '@/Components/CancelModal';
+import ReviewModal from '@/Components/ReviewModal';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import type { PageProps } from '@/types';
@@ -27,6 +29,15 @@ interface RideVehicle {
     seat_capacity: number;
 }
 
+interface Review {
+    id: number;
+    booking_id: number;
+    reviewer_id: number;
+    reviewee_id: number;
+    rating: number;
+    comment?: string | null;
+}
+
 interface Ride {
     id: number;
     driver_id: number;
@@ -36,8 +47,9 @@ interface Ride {
     available_seats: number;
     total_seats: number;
     price_per_seat: string;
-    status: string;
+    status: string; // 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
     notes: string | null;
+    cancellation_reason?: string | null;
     stops: RideStop[];
 }
 
@@ -47,6 +59,7 @@ interface PassengerBooking {
     seats_booked: number;
     price_per_seat: string;
     created_at: string;
+    cancellation_reason?: string | null;
     passenger: {
         id: number;
         name: string;
@@ -60,6 +73,7 @@ interface PassengerBooking {
         id: number;
         stop_name: string;
     } | null;
+    reviews?: Review[];
 }
 
 interface BookingFormData {
@@ -73,8 +87,10 @@ interface ExistingBooking {
     status: string;
     seats_booked: number;
     price_per_seat: string;
+    cancellation_reason?: string | null;
     pickupStop?: { id: number; stop_name: string } | null;
     dropoffStop?: { id: number; stop_name: string } | null;
+    reviews?: Review[];
 }
 
 interface Props extends PageProps {
@@ -82,8 +98,9 @@ interface Props extends PageProps {
     isDriver?: boolean;
     bookings?: PassengerBooking[];
     existingBooking?: ExistingBooking | null;
+    driverRating?: number;
+    driverReviewCount?: number;
 }
-
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -162,10 +179,20 @@ function StopTimeline({ stops }: { stops: RideStop[] }) {
 
 // ─── Driver Bookings Management ──────────────────────────────────────────────
 
-function DriverBookingsManagement({ bookings }: { bookings: PassengerBooking[] }) {
+function DriverBookingsManagement({
+    ride,
+    bookings,
+    currentUserId,
+    onOpenReviewModal,
+}: {
+    ride: Ride;
+    bookings: PassengerBooking[];
+    currentUserId: number;
+    onOpenReviewModal: (bookingId: number, targetName: string) => void;
+}) {
     const pendingBookings = bookings.filter((b) => b.status === 'pending');
     const otherBookings = bookings.filter((b) => b.status !== 'pending');
-    const acceptedCount = bookings.filter((b) => b.status === 'accepted').length;
+    const acceptedCount = bookings.filter((b) => b.status === 'accepted' || b.status === 'completed').length;
 
     function handleAccept(id: number) {
         router.patch(route('bookings.accept', id), {}, {
@@ -279,12 +306,18 @@ function DriverBookingsManagement({ bookings }: { bookings: PassengerBooking[] }
                     {otherBookings.length > 0 && (
                         <div className="space-y-3 pt-2">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                                Confirmed & Other Bookings ({otherBookings.length})
+                                Confirmed & Past Bookings ({otherBookings.length})
                             </h4>
                             <div className="space-y-2">
                                 {otherBookings.map((booking) => {
                                     const totalCost = (Number(booking.price_per_seat) * booking.seats_booked).toFixed(2);
                                     const isAccepted = booking.status === 'accepted';
+                                    const isCompleted = booking.status === 'completed' || ride.status === 'completed';
+                                    const isCancelled = booking.status === 'cancelled' || booking.status === 'cancelled_by_driver';
+
+                                    const driverReview = booking.reviews?.find(
+                                        (r) => Number(r.reviewer_id) === Number(currentUserId),
+                                    );
 
                                     return (
                                         <div
@@ -297,18 +330,22 @@ function DriverBookingsManagement({ bookings }: { bookings: PassengerBooking[] }
                                                         {booking.passenger.name.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 flex-wrap">
                                                             <p className="font-semibold text-gray-900 text-sm">{booking.passenger.name}</p>
                                                             <span
                                                                 className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                                                    booking.status === 'accepted'
+                                                                    booking.status === 'completed'
+                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        : booking.status === 'accepted'
                                                                         ? 'bg-emerald-100 text-emerald-800'
-                                                                        : booking.status === 'rejected'
-                                                                        ? 'bg-red-100 text-red-800'
-                                                                        : 'bg-gray-100 text-gray-600'
+                                                                        : isCancelled
+                                                                        ? 'bg-gray-100 text-gray-600'
+                                                                        : 'bg-red-100 text-red-800'
                                                                 }`}
                                                             >
-                                                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                                {booking.status === 'cancelled_by_driver'
+                                                                    ? 'Cancelled by Driver'
+                                                                    : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                                             </span>
                                                         </div>
                                                         <div className="mt-0.5 text-xs text-gray-500">
@@ -318,17 +355,41 @@ function DriverBookingsManagement({ bookings }: { bookings: PassengerBooking[] }
                                                             <span className="mx-1.5 text-gray-300">·</span>
                                                             <span>{booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''} (${totalCost})</span>
                                                         </div>
+                                                        {booking.cancellation_reason && (
+                                                            <p className="mt-1 text-xs text-red-600 italic">
+                                                                Cancellation Reason: {booking.cancellation_reason}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
 
-                                                {isAccepted && (
-                                                    <button
-                                                        onClick={() => handleReject(booking.id)}
-                                                        className="self-start sm:self-center rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
-                                                    >
-                                                        Cancel / Reject
-                                                    </button>
-                                                )}
+                                                <div className="flex items-center gap-2 self-start sm:self-center">
+                                                    {/* Review options on completed trips */}
+                                                    {isCompleted && (
+                                                        driverReview ? (
+                                                            <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                                                ★ {driverReview.rating} Reviewed
+                                                            </span>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => onOpenReviewModal(booking.id, booking.passenger.name)}
+                                                                className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 transition"
+                                                            >
+                                                                Review Passenger
+                                                            </button>
+                                                        )
+                                                    )}
+
+                                                    {/* Cancel / Reject button before trip starts */}
+                                                    {isAccepted && ride.status !== 'in_progress' && ride.status !== 'completed' && (
+                                                        <button
+                                                            onClick={() => handleReject(booking.id)}
+                                                            className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                                        >
+                                                            Cancel Seat
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     );
@@ -376,17 +437,35 @@ function BookingForm({
         );
     }
 
-    if (existingBooking && ['pending', 'accepted'].includes(existingBooking.status)) {
+    if (existingBooking && ['pending', 'accepted', 'completed'].includes(existingBooking.status)) {
         return (
             <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
                 <p className="font-semibold">
-                    {existingBooking.status === 'accepted'
+                    {existingBooking.status === 'completed'
+                        ? '✓ Trip Completed'
+                        : existingBooking.status === 'accepted'
                         ? '✓ Booking Confirmed'
                         : '⏳ Your booking is currently Pending'}
                 </p>
                 <p className="mt-1 text-xs text-indigo-700">
-                    You have already requested {existingBooking.seats_booked} seat{existingBooking.seats_booked !== 1 ? 's' : ''} on this ride.
+                    You have reserved {existingBooking.seats_booked} seat{existingBooking.seats_booked !== 1 ? 's' : ''} on this ride.
                 </p>
+            </div>
+        );
+    }
+
+    if (ride.status === 'cancelled') {
+        return (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                This ride has been cancelled by the driver.
+            </div>
+        );
+    }
+
+    if (ride.status === 'in_progress' || ride.status === 'completed') {
+        return (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                This ride is already {ride.status === 'in_progress' ? 'in progress' : 'completed'} and no longer accepting bookings.
             </div>
         );
     }
@@ -399,40 +478,42 @@ function BookingForm({
         );
     }
 
-
     const orderedStops = [...ride.stops].sort((a, b) => a.stop_order - b.stop_order);
 
     const pickupStop = orderedStops.find((s) => String(s.id) === data.pickup_stop_id);
-    const dropoffOptions = pickupStop
+    const dropoffCandidates = pickupStop
         ? orderedStops.filter((s) => s.stop_order > pickupStop.stop_order)
         : orderedStops.slice(1);
 
+    const availableOptions = Array.from(
+        { length: ride.available_seats },
+        (_, i) => i + 1,
+    );
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
             {/* Pickup stop */}
             <div>
-                <label htmlFor="pickup_stop_id" className="block text-sm font-medium text-gray-700">
-                    Pickup Stop <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                    Pickup Stop
                 </label>
                 <select
-                    id="pickup_stop_id"
                     value={data.pickup_stop_id}
                     onChange={(e) => {
-                        setData('pickup_stop_id', e.target.value);
-                        setData('dropoff_stop_id', '');
+                        setData((prev) => ({
+                            ...prev,
+                            pickup_stop_id: e.target.value,
+                            dropoff_stop_id: '',
+                        }));
                     }}
-                    className={[
-                        'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1',
-                        errors.pickup_stop_id
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
-                    ].join(' ')}
+                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
                 >
-                    <option value="">— Select pickup stop —</option>
-                    {orderedStops.slice(0, -1).map((stop) => (
-                        <option key={stop.id} value={stop.id}>
-                            {stop.stop_name}
-                            {stop.estimated_time ? ` (${formatTime(stop.estimated_time)})` : ''}
+                    <option value="">Select pickup landmark…</option>
+                    {orderedStops.slice(0, -1).map((s) => (
+                        <option key={s.id} value={String(s.id)}>
+                            {s.stop_name}
+                            {s.estimated_time ? ` (${formatTime(s.estimated_time)})` : ''}
                         </option>
                     ))}
                 </select>
@@ -443,26 +524,21 @@ function BookingForm({
 
             {/* Dropoff stop */}
             <div>
-                <label htmlFor="dropoff_stop_id" className="block text-sm font-medium text-gray-700">
-                    Dropoff Stop <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                    Drop-off Stop
                 </label>
                 <select
-                    id="dropoff_stop_id"
                     value={data.dropoff_stop_id}
                     onChange={(e) => setData('dropoff_stop_id', e.target.value)}
                     disabled={!data.pickup_stop_id}
-                    className={[
-                        'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
-                        errors.dropoff_stop_id
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
-                    ].join(' ')}
+                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    required
                 >
-                    <option value="">— Select dropoff stop —</option>
-                    {dropoffOptions.map((stop) => (
-                        <option key={stop.id} value={stop.id}>
-                            {stop.stop_name}
-                            {stop.estimated_time ? ` (${formatTime(stop.estimated_time)})` : ''}
+                    <option value="">Select drop-off landmark…</option>
+                    {dropoffCandidates.map((s) => (
+                        <option key={s.id} value={String(s.id)}>
+                            {s.stop_name}
+                            {s.estimated_time ? ` (${formatTime(s.estimated_time)})` : ''}
                         </option>
                     ))}
                 </select>
@@ -473,46 +549,24 @@ function BookingForm({
 
             {/* Seats */}
             <div>
-                <label htmlFor="seats_booked" className="block text-sm font-medium text-gray-700">
-                    Seats Requested <span className="text-red-500">*</span>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                    Seats Needed
                 </label>
-                <input
-                    id="seats_booked"
-                    type="number"
-                    min={1}
-                    max={ride.available_seats}
+                <select
                     value={data.seats_booked}
                     onChange={(e) => setData('seats_booked', e.target.value)}
-                    className={[
-                        'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1',
-                        errors.seats_booked
-                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
-                            : 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500',
-                    ].join(' ')}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                    Up to {ride.available_seats} seat{ride.available_seats !== 1 ? 's' : ''} available
-                </p>
+                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                    {availableOptions.map((n) => (
+                        <option key={n} value={String(n)}>
+                            {n} seat{n !== 1 ? 's' : ''}
+                        </option>
+                    ))}
+                </select>
                 {errors.seats_booked && (
                     <p className="mt-1 text-xs text-red-600">{errors.seats_booked}</p>
                 )}
-                {(errors as Record<string, string>).seats && (
-                    <p className="mt-1 text-xs text-red-600">{(errors as Record<string, string>).seats}</p>
-                )}
             </div>
-
-
-            {/* General errors */}
-            {(errors as Record<string, string>).ride && (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                    {(errors as Record<string, string>).ride}
-                </p>
-            )}
-            {(errors as Record<string, string>).stops && (
-                <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-                    {(errors as Record<string, string>).stops}
-                </p>
-            )}
 
             {/* Price preview */}
             {data.seats_booked && Number(ride.price_per_seat) > 0 && (
@@ -538,28 +592,93 @@ function BookingForm({
     );
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+// ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function RidesShow({
     ride,
     isDriver: isDriverProp,
     bookings = [],
     existingBooking = null,
+    driverRating = 0,
+    driverReviewCount = 0,
 }: Props) {
     const { auth } = usePage<Props>().props;
     const isOwnerDriver = Boolean(isDriverProp || (auth?.user && Number(auth.user.id) === Number(ride.driver_id)));
     const [showBooking, setShowBooking] = useState(false);
 
+    // Modal state
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [cancelModalMode, setCancelModalMode] = useState<'driver' | 'passenger'>('driver');
+
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [reviewTargetBookingId, setReviewTargetBookingId] = useState<number | null>(null);
+    const [reviewTargetName, setReviewTargetName] = useState<string>('');
+    const [reviewTargetRole, setReviewTargetRole] = useState<'Driver' | 'Passenger'>('Driver');
+
     const hasActiveBooking = Boolean(
         existingBooking && ['pending', 'accepted'].includes(existingBooking.status),
+    );
+    const isCompletedBooking = Boolean(
+        existingBooking && existingBooking.status === 'completed',
     );
 
     const pendingRequestsCount = bookings.filter((b) => b.status === 'pending').length;
 
-
     const seatsPercent = Math.round(
         ((ride.total_seats - ride.available_seats) / ride.total_seats) * 100,
     );
+
+    // Check if current user has already reviewed the other party
+    const passengerReviewForDriver = existingBooking?.reviews?.find(
+        (r) => Number(r.reviewer_id) === Number(auth.user.id),
+    );
+
+    // ── Driver Lifecycle Handlers ──
+    function handleStartTrip() {
+        if (!confirm('Start this trip now? Cancellations will be locked once in progress.')) return;
+        router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+    }
+
+    function handleCompleteTrip() {
+        if (!confirm('Complete this trip? All accepted passenger bookings will be marked completed.')) return;
+        router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+    }
+
+    // ── Cancellation Handler ──
+    function handleConfirmCancellation(reason: string) {
+        if (cancelModalMode === 'driver') {
+            router.patch(
+                route('rides.cancel', ride.id),
+                { reason },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => setCancelModalOpen(false),
+                },
+            );
+        } else if (existingBooking) {
+            router.patch(
+                route('bookings.cancel', existingBooking.id),
+                { reason },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => setCancelModalOpen(false),
+                },
+            );
+        }
+    }
+
+    // ── Review Handler ──
+    function handleSubmitReview(rating: number, comment: string) {
+        if (!reviewTargetBookingId) return;
+        router.post(
+            route('bookings.reviews.store', reviewTargetBookingId),
+            { rating, comment },
+            {
+                preserveScroll: true,
+                onSuccess: () => setReviewModalOpen(false),
+            },
+        );
+    }
 
     return (
         <AuthenticatedLayout
@@ -581,7 +700,96 @@ export default function RidesShow({
             <Head title="Ride Details" />
 
             <div className="py-8">
-                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-6">
+
+                    {/* ── Driver Lifecycle Action Banner (Owner view) ── */}
+                    {isOwnerDriver && (
+                        <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 via-white to-purple-50 p-5 shadow-sm">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                            Trip Management
+                                        </span>
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                                ride.status === 'in_progress'
+                                                    ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-300'
+                                                    : ride.status === 'completed'
+                                                    ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300'
+                                                    : ride.status === 'cancelled'
+                                                    ? 'bg-red-100 text-red-800 ring-1 ring-red-300'
+                                                    : 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-300'
+                                            }`}
+                                        >
+                                            {ride.status === 'in_progress' && (
+                                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600 animate-pulse" />
+                                            )}
+                                            {ride.status === 'in_progress'
+                                                ? 'In Progress'
+                                                : ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 text-sm font-semibold text-gray-900">
+                                        {ride.status === 'scheduled' && 'Ready to hit the road? Start the trip when you begin driving.'}
+                                        {ride.status === 'in_progress' && 'Trip is currently in progress! Cancellations are locked.'}
+                                        {ride.status === 'completed' && 'Trip completed! You and your passengers can exchange mutual reviews below.'}
+                                        {ride.status === 'cancelled' && `Trip was cancelled: ${ride.cancellation_reason ?? 'No reason provided'}`}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-2.5 flex-wrap">
+                                    {ride.status === 'scheduled' && (
+                                        <>
+                                            <button
+                                                onClick={handleStartTrip}
+                                                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                                            >
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                                                </svg>
+                                                Start Trip
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setCancelModalMode('driver');
+                                                    setCancelModalOpen(true);
+                                                }}
+                                                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                                            >
+                                                Cancel Trip
+                                            </button>
+                                        </>
+                                    )}
+
+                                    {ride.status === 'in_progress' && (
+                                        <button
+                                            onClick={handleCompleteTrip}
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                            </svg>
+                                            Complete Trip
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ── Cancelled Banner (if ride cancelled) ── */}
+                    {ride.status === 'cancelled' && (
+                        <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+                            <h3 className="text-sm font-bold text-red-800">Trip Cancelled by Driver</h3>
+                            <p className="mt-1 text-xs text-red-700">
+                                {ride.cancellation_reason
+                                    ? `Reason: ${ride.cancellation_reason}`
+                                    : 'This trip has been cancelled.'}
+                            </p>
+                        </div>
+                    )}
+
                     <div className="grid gap-6 lg:grid-cols-3">
 
                         {/* ── Left column: details ── */}
@@ -589,7 +797,17 @@ export default function RidesShow({
 
                             {/* Driver Bookings Management (if owner) */}
                             {isOwnerDriver && (
-                                <DriverBookingsManagement bookings={bookings} />
+                                <DriverBookingsManagement
+                                    ride={ride}
+                                    bookings={bookings}
+                                    currentUserId={auth.user.id}
+                                    onOpenReviewModal={(bookingId, targetName) => {
+                                        setReviewTargetBookingId(bookingId);
+                                        setReviewTargetName(targetName);
+                                        setReviewTargetRole('Passenger');
+                                        setReviewModalOpen(true);
+                                    }}
+                                />
                             )}
 
                             {/* Driver card */}
@@ -597,13 +815,27 @@ export default function RidesShow({
                                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
                                     Driver
                                 </h3>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
-                                        {ride.driver.name.charAt(0).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{ride.driver.name}</p>
-                                        <p className="text-sm text-gray-500">{ride.driver.email}</p>
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
+                                            {ride.driver.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-semibold text-gray-900">{ride.driver.name}</p>
+                                                {driverRating > 0 ? (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                                        ★ {driverRating.toFixed(1)}
+                                                        <span className="text-gray-400 font-normal">({driverReviewCount})</span>
+                                                    </span>
+                                                ) : (
+                                                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                                                        New Driver
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-500">{ride.driver.email}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -723,13 +955,61 @@ export default function RidesShow({
                                                 ? `Your seat reservation (${existingBooking!.seats_booked} seat${existingBooking!.seats_booked !== 1 ? 's' : ''}) is confirmed.`
                                                 : `You have submitted a request for ${existingBooking!.seats_booked} seat${existingBooking!.seats_booked !== 1 ? 's' : ''}. Awaiting driver review.`}
                                         </p>
-                                        <div className="mt-3 flex items-center gap-2">
+                                        <div className="mt-3 flex items-center gap-2 flex-wrap">
                                             <Link
                                                 href={route('bookings.index')}
                                                 className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
                                             >
                                                 View in My Trips
                                             </Link>
+                                            {ride.status === 'in_progress' ? (
+                                                <span className="text-[11px] text-gray-500 italic">
+                                                    Trip in progress (cancellation locked)
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => {
+                                                        setCancelModalMode('passenger');
+                                                        setCancelModalOpen(true);
+                                                    }}
+                                                    className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                                >
+                                                    Cancel Booking
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : isCompletedBooking ? (
+                                    <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+                                        <div className="flex items-center gap-2">
+                                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">
+                                                ✓
+                                            </span>
+                                            <span className="text-xs font-bold text-blue-900">
+                                                Trip Completed
+                                            </span>
+                                        </div>
+                                        <p className="mt-2 text-xs text-blue-700">
+                                            Hope you had a pleasant ride!
+                                        </p>
+                                        <div className="mt-3">
+                                            {passengerReviewForDriver ? (
+                                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                                                    ★ {passengerReviewForDriver.rating} You reviewed this driver
+                                                </span>
+                                            ) : (
+                                                <button
+                                                    onClick={() => {
+                                                        setReviewTargetBookingId(existingBooking!.id);
+                                                        setReviewTargetName(ride.driver.name);
+                                                        setReviewTargetRole('Driver');
+                                                        setReviewModalOpen(true);
+                                                    }}
+                                                    className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 transition"
+                                                >
+                                                    Leave Driver a Review
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ) : (
@@ -737,13 +1017,19 @@ export default function RidesShow({
                                         onClick={() => setShowBooking((v) => !v)}
                                         className={[
                                             'mt-4 w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition',
-                                            ride.available_seats === 0
+                                            ride.available_seats === 0 || ride.status !== 'scheduled'
                                                 ? 'cursor-not-allowed bg-gray-200 text-gray-400'
                                                 : 'bg-indigo-600 text-white hover:bg-indigo-700',
                                         ].join(' ')}
-                                        disabled={ride.available_seats === 0}
+                                        disabled={ride.available_seats === 0 || ride.status !== 'scheduled'}
                                     >
-                                        {ride.available_seats === 0
+                                        {ride.status === 'in_progress'
+                                            ? 'Trip in Progress'
+                                            : ride.status === 'completed'
+                                            ? 'Trip Completed'
+                                            : ride.status === 'cancelled'
+                                            ? 'Trip Cancelled'
+                                            : ride.available_seats === 0
                                             ? 'Fully Booked'
                                             : showBooking
                                             ? 'Cancel'
@@ -753,7 +1039,7 @@ export default function RidesShow({
                             </div>
 
                             {/* Booking form (collapsible, passenger only, hidden if already booked) */}
-                            {!isOwnerDriver && !hasActiveBooking && showBooking && (
+                            {!isOwnerDriver && !hasActiveBooking && !isCompletedBooking && showBooking && (
                                 <div className="rounded-2xl border border-indigo-200 bg-white p-5 shadow-sm">
                                     <h3 className="mb-4 text-sm font-semibold text-gray-700">
                                         Booking Details
@@ -767,6 +1053,34 @@ export default function RidesShow({
                     </div>
                 </div>
             </div>
+
+            {/* ── Cancellation Modal ── */}
+            <CancelModal
+                isOpen={cancelModalOpen}
+                title={cancelModalMode === 'driver' ? 'Cancel Entire Trip' : 'Cancel Your Booking'}
+                description={
+                    cancelModalMode === 'driver'
+                        ? 'Cancelling this ride will immediately notify all booked passengers and mark their bookings as cancelled.'
+                        : 'Cancelling your reservation will restore your booked seats to the ride for other passengers.'
+                }
+                isReasonRequired={cancelModalMode === 'driver'}
+                reasonPlaceholder={
+                    cancelModalMode === 'driver'
+                        ? 'e.g., Vehicle breakdown, emergency, schedule conflict…'
+                        : 'e.g., Plans changed, found another ride…'
+                }
+                onClose={() => setCancelModalOpen(false)}
+                onConfirm={handleConfirmCancellation}
+            />
+
+            {/* ── Review Modal ── */}
+            <ReviewModal
+                isOpen={reviewModalOpen}
+                targetName={reviewTargetName}
+                roleLabel={reviewTargetRole}
+                onClose={() => setReviewModalOpen(false)}
+                onSubmit={handleSubmitReview}
+            />
         </AuthenticatedLayout>
     );
 }

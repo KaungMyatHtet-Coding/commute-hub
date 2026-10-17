@@ -21,7 +21,7 @@ class RideController extends Controller
     {
         $query = Ride::query()
             ->with([
-                'driver:id,name',
+                'driver' => fn ($q) => $q->select('id', 'name')->withAvg('reviewsReceived as average_rating', 'rating')->withCount('reviewsReceived'),
                 'vehicle:id,make,model,color,license_plate',
                 'stops' => fn ($q) => $q->orderBy('stop_order'),
             ])
@@ -76,6 +76,8 @@ class RideController extends Controller
 
         $isDriver = (int) $request->user()->id === (int) $ride->driver_id;
 
+        $driverRating = round((float) ($ride->driver->reviewsReceived()->avg('rating') ?? 0.0), 1);
+        $driverReviewCount = $ride->driver->reviewsReceived()->count();
 
         // If the logged-in user is a passenger, fetch their existing booking on this ride (if any)
         $existingBooking = ! $isDriver
@@ -84,6 +86,7 @@ class RideController extends Controller
                 ->with([
                     'pickupStop:id,stop_name',
                     'dropoffStop:id,stop_name',
+                    'reviews',
                 ])
                 ->first()
             : null;
@@ -95,18 +98,20 @@ class RideController extends Controller
                     'passenger:id,name,email',
                     'pickupStop:id,stop_name',
                     'dropoffStop:id,stop_name',
+                    'reviews',
                 ])
                 ->orderBy('created_at', 'desc')
                 ->get()
             : collect();
 
         return Inertia::render('Rides/Show', [
-            'ride'            => $ride,
-            'isDriver'        => $isDriver,
-            'bookings'        => $bookings,
-            'existingBooking' => $existingBooking,
+            'ride'              => $ride,
+            'isDriver'          => $isDriver,
+            'bookings'          => $bookings,
+            'existingBooking'   => $existingBooking,
+            'driverRating'      => $driverRating,
+            'driverReviewCount' => $driverReviewCount,
         ]);
-
     }
 
     /**

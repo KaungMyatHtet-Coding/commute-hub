@@ -9,7 +9,17 @@ class Ride extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['driver_id', 'vehicle_id', 'departure_time', 'total_seats', 'available_seats', 'price_per_seat', 'status', 'notes'];
+    protected $fillable = [
+        'driver_id',
+        'vehicle_id',
+        'departure_time',
+        'total_seats',
+        'available_seats',
+        'price_per_seat',
+        'status',
+        'notes',
+        'cancellation_reason',
+    ];
 
     protected function casts(): array
     {
@@ -22,7 +32,6 @@ class Ride extends Model
             'price_per_seat' => 'decimal:2',
         ];
     }
-
 
     public function driver()
     {
@@ -42,5 +51,10 @@ class Ride extends Model
     public function bookings()
     {
         return $this->hasMany(RideBooking::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasManyThrough(Review::class, RideBooking::class, 'ride_id', 'booking_id');
     }
 }

@@ -164,9 +164,154 @@ class RideWorkflowTest extends TestCase
         ]);
         $this->ride->update(['available_seats' => 3]);
 
-        $response = $this->actingAs($this->passenger)->patch("/bookings/{$booking->id}/cancel");
+        $response = $this->actingAs($this->passenger)->patch("/bookings/{$booking->id}/cancel", [
+            'reason' => 'Schedule changed',
+        ]);
         $response->assertRedirect();
         $this->assertEquals('cancelled', $booking->fresh()->status);
+        $this->assertEquals('Schedule changed', $booking->fresh()->cancellation_reason);
         $this->assertEquals(4, $this->ride->fresh()->available_seats);
+    }
+
+    public function test_driver_can_start_and_complete_trip_lifecycle(): void
+    {
+        $booking = RideBooking::create([
+            'ride_id' => $this->ride->id,
+            'passenger_id' => $this->passenger->id,
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+            'price_per_seat' => 10.00,
+            'status' => 'accepted',
+        ]);
+
+        // Start Trip
+        $startResponse = $this->actingAs($this->driver)->patch("/rides/{$this->ride->id}/start");
+        $startResponse->assertRedirect();
+        $this->assertEquals('in_progress', $this->ride->fresh()->status);
+
+        // Complete Trip (marks accepted bookings as completed)
+        $completeResponse = $this->actingAs($this->driver)->patch("/rides/{$this->ride->id}/complete");
+        $completeResponse->assertRedirect();
+        $this->assertEquals('completed', $this->ride->fresh()->status);
+        $this->assertEquals('completed', $booking->fresh()->status);
+    }
+
+    public function test_cancellations_are_blocked_once_trip_is_in_progress(): void
+    {
+        $booking = RideBooking::create([
+            'ride_id' => $this->ride->id,
+            'passenger_id' => $this->passenger->id,
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+            'price_per_seat' => 10.00,
+            'status' => 'accepted',
+        ]);
+
+        $this->ride->update(['status' => 'in_progress']);
+
+        // Passenger cancel attempt
+        $passengerCancel = $this->actingAs($this->passenger)->patch("/bookings/{$booking->id}/cancel");
+        $passengerCancel->assertSessionHasErrors(['booking']);
+        $this->assertEquals('accepted', $booking->fresh()->status);
+
+        // Driver cancel attempt
+        $driverCancel = $this->actingAs($this->driver)->patch("/rides/{$this->ride->id}/cancel", [
+            'reason' => 'Emergency',
+        ]);
+        $driverCancel->assertSessionHasErrors(['error']);
+        $this->assertEquals('in_progress', $this->ride->fresh()->status);
+    }
+
+    public function test_driver_can_cancel_scheduled_trip_with_reason(): void
+    {
+        $booking = RideBooking::create([
+            'ride_id' => $this->ride->id,
+            'passenger_id' => $this->passenger->id,
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+            'price_per_seat' => 10.00,
+            'status' => 'accepted',
+        ]);
+
+        $response = $this->actingAs($this->driver)->patch("/rides/{$this->ride->id}/cancel", [
+            'reason' => 'Flat tire on highway',
+        ]);
+        $response->assertRedirect();
+
+        $this->assertEquals('cancelled', $this->ride->fresh()->status);
+        $this->assertEquals('Flat tire on highway', $this->ride->fresh()->cancellation_reason);
+        $this->assertEquals('cancelled_by_driver', $booking->fresh()->status);
+        $this->assertEquals('Flat tire on highway', $booking->fresh()->cancellation_reason);
+    }
+
+    public function test_mutual_reviews_for_completed_trip(): void
+    {
+        $this->ride->update(['status' => 'completed']);
+        $booking = RideBooking::create([
+            'ride_id' => $this->ride->id,
+            'passenger_id' => $this->passenger->id,
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+            'price_per_seat' => 10.00,
+            'status' => 'completed',
+        ]);
+
+        // Passenger reviews Driver
+        $passengerReview = $this->actingAs($this->passenger)->post("/bookings/{$booking->id}/reviews", [
+            'rating' => 5,
+            'comment' => 'Smooth ride and on time!',
+        ]);
+        $passengerReview->assertRedirect();
+        $this->assertDatabaseHas('reviews', [
+            'booking_id' => $booking->id,
+            'reviewer_id' => $this->passenger->id,
+            'reviewee_id' => $this->driver->id,
+            'rating' => 5,
+            'comment' => 'Smooth ride and on time!',
+        ]);
+
+        // Driver reviews Passenger
+        $driverReview = $this->actingAs($this->driver)->post("/bookings/{$booking->id}/reviews", [
+            'rating' => 4,
+            'comment' => 'Great passenger, very polite.',
+        ]);
+        $driverReview->assertRedirect();
+        $this->assertDatabaseHas('reviews', [
+            'booking_id' => $booking->id,
+            'reviewer_id' => $this->driver->id,
+            'reviewee_id' => $this->passenger->id,
+            'rating' => 4,
+            'comment' => 'Great passenger, very polite.',
+        ]);
+
+        // Duplicate review by passenger is prevented
+        $duplicate = $this->actingAs($this->passenger)->post("/bookings/{$booking->id}/reviews", [
+            'rating' => 5,
+            'comment' => 'Another comment',
+        ]);
+        $duplicate->assertSessionHasErrors(['rating']);
+    }
+
+    public function test_cannot_review_incomplete_trip(): void
+    {
+        $booking = RideBooking::create([
+            'ride_id' => $this->ride->id,
+            'passenger_id' => $this->passenger->id,
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+            'price_per_seat' => 10.00,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($this->passenger)->post("/bookings/{$booking->id}/reviews", [
+            'rating' => 5,
+            'comment' => 'Premature review',
+        ]);
+        $response->assertSessionHasErrors(['rating']);
     }
 }

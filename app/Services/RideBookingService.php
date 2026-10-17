@@ -98,18 +98,29 @@ class RideBookingService
         }, attempts: 3);
     }
 
-    public function cancel(RideBooking $booking): RideBooking
+    public function cancel(RideBooking $booking, ?string $reason = null): RideBooking
     {
-        return DB::transaction(function () use ($booking): RideBooking {
+        return DB::transaction(function () use ($booking, $reason): RideBooking {
             $booking = RideBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $ride = Ride::query()->lockForUpdate()->findOrFail($booking->ride_id);
+
+            if (in_array($ride->status, ['in_progress', 'completed'], true)) {
+                throw ValidationException::withMessages(['booking' => 'Cannot cancel a booking once the trip is in progress or completed.']);
+            }
+
             if (! in_array($booking->status, ['pending', 'accepted'], true)) {
                 throw ValidationException::withMessages(['booking' => 'This booking cannot be cancelled.']);
             }
+
             if ($booking->status === 'accepted') {
                 $ride->increment('available_seats', $booking->seats_booked);
             }
-            $booking->update(['status' => 'cancelled', 'cancelled_at' => now()]);
+
+            $booking->update([
+                'status'              => 'cancelled',
+                'cancelled_at'        => now(),
+                'cancellation_reason' => $reason,
+            ]);
 
             return $booking->fresh();
         }, attempts: 3);

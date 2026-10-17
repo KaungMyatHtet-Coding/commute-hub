@@ -9,7 +9,18 @@ class RideBooking extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['ride_id', 'passenger_id', 'pickup_stop_id', 'dropoff_stop_id', 'seats_booked', 'price_per_seat', 'status', 'accepted_at', 'cancelled_at'];
+    protected $fillable = [
+        'ride_id',
+        'passenger_id',
+        'pickup_stop_id',
+        'dropoff_stop_id',
+        'seats_booked',
+        'price_per_seat',
+        'status',
+        'accepted_at',
+        'cancelled_at',
+        'cancellation_reason',
+    ];
 
     protected function casts(): array
     {

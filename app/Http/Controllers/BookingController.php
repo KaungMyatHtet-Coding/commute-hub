@@ -17,25 +17,26 @@ class BookingController extends Controller
 
         $base = RideBooking::query()
             ->with([
-                'ride:id,driver_id,vehicle_id,departure_time,price_per_seat,available_seats,status',
+                'ride:id,driver_id,vehicle_id,departure_time,price_per_seat,available_seats,status,cancellation_reason',
                 'ride.driver:id,name',
                 'ride.vehicle:id,make,model,color,license_plate',
                 'ride.stops',
                 'pickupStop:id,stop_name,estimated_time',
                 'dropoffStop:id,stop_name,estimated_time',
+                'reviews',
             ])
             ->where('passenger_id', $user->id);
 
         $upcoming = (clone $base)
-            ->whereHas('ride', fn ($q) => $q->where('departure_time', '>=', $now))
+            ->whereHas('ride', fn ($q) => $q->whereIn('status', ['scheduled', 'in_progress'])->where('departure_time', '>=', $now))
             ->whereIn('status', ['pending', 'accepted'])
             ->latest()
             ->get();
 
         $past = (clone $base)
             ->where(function ($q) use ($now) {
-                $q->whereHas('ride', fn ($r) => $r->where('departure_time', '<', $now))
-                  ->orWhereIn('status', ['cancelled', 'rejected', 'completed']);
+                $q->whereHas('ride', fn ($r) => $r->where('departure_time', '<', $now)->orWhereIn('status', ['completed', 'cancelled']))
+                  ->orWhereIn('status', ['cancelled', 'cancelled_by_driver', 'rejected', 'completed']);
             })
             ->latest()
             ->limit(20)
@@ -49,6 +50,7 @@ class BookingController extends Controller
                 'bookings.passenger:id,name,email',
                 'bookings.pickupStop:id,stop_name',
                 'bookings.dropoffStop:id,stop_name',
+                'bookings.reviews',
             ])
             ->withCount([
                 'bookings as pending_bookings_count' => fn ($q) => $q->where('status', 'pending'),

@@ -57,7 +57,8 @@ class RideBookingController extends Controller
             (int) $booking->passenger_id === (int) $request->user()->id || (int) $ride->driver_id === (int) $request->user()->id,
             403
         );
-        $bookings->cancel($booking);
+        $reason = $request->input('reason', $request->input('cancellation_reason'));
+        $bookings->cancel($booking, $reason);
 
         return back()->with('success', 'Booking cancelled.');
     }

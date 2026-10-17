@@ -25,7 +25,7 @@ class DashboardController extends Controller
         // Recent activity — latest 5 bookings where user is passenger or driver
         $recentBookings = RideBooking::query()
             ->with([
-                'ride:id,driver_id,vehicle_id,departure_time,price_per_seat',
+                'ride:id,driver_id,vehicle_id,departure_time,price_per_seat,status',
                 'ride.driver:id,name',
                 'ride.vehicle:id,make,model,color,license_plate',
                 'ride.stops' => fn ($q) => $q->orderBy('stop_order'),
@@ -33,8 +33,6 @@ class DashboardController extends Controller
                 'dropoffStop:id,stop_name',
                 'passenger:id,name',
             ])
-
-
             ->where(function ($q) use ($user) {
                 $q->where('passenger_id', $user->id)
                   ->orWhereHas('ride', fn ($r) => $r->where('driver_id', $user->id));
@@ -43,12 +41,25 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $activeRide = Ride::query()
+            ->where('driver_id', $user->id)
+            ->whereIn('status', ['scheduled', 'in_progress'])
+            ->with(['stops', 'vehicle'])
+            ->orderBy('departure_time')
+            ->first();
+
+        $averageRating = round((float) ($user->reviewsReceived()->avg('rating') ?? 0.0), 1);
+        $reviewCount = $user->reviewsReceived()->count();
+
         return Inertia::render('Dashboard', [
             'stats' => [
-                'rides_taken'   => $ridesTaken,
-                'rides_offered' => $ridesOffered,
+                'rides_taken'    => $ridesTaken,
+                'rides_offered'  => $ridesOffered,
+                'average_rating' => $averageRating,
+                'review_count'   => $reviewCount,
             ],
             'recentBookings' => $recentBookings,
+            'activeRide'     => $activeRide,
         ]);
     }
 }

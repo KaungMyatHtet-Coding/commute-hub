@@ -70,4 +70,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(RideBooking::class, 'passenger_id');
     }
+
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewee_id');
+    }
+
+    public function reviewsGiven()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
+    public function averageRating(): float
+    {
+        return round((float) ($this->reviewsReceived()->avg('rating') ?? 0.0), 1);
+    }
 }
