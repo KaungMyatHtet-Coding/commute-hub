@@ -192,20 +192,20 @@ export default function CreateRide({ vehicles, townships }: Props) {
             <Head title="Offer a Ride" />
 
             {/* ── Page wrapper ── */}
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/40 to-purple-50/40 py-10">
+            <div className="min-h-screen bg-slate-50 dark:bg-[#121212] py-10">
                 <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
 
                     {/* ── No vehicles warning ── */}
                     {vehicles.length === 0 && (
-                        <div className="mb-6 flex items-start gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                        <div className="mb-6 flex items-start gap-4 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 p-5 shadow-sm">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-400">
                                 <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M12 2a10 10 0 100 20A10 10 0 0012 2z" />
                                 </svg>
                             </span>
                             <div>
-                                <p className="font-semibold text-amber-800">No active vehicles registered</p>
-                                <p className="mt-0.5 text-sm text-amber-700">
+                                <p className="font-semibold text-amber-800 dark:text-amber-300">No active vehicles registered</p>
+                                <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
                                     You need an approved vehicle before posting a ride.{' '}
                                     <Link href={route('driver-application.create')} className="underline font-bold">
                                         Register a vehicle
@@ -218,7 +218,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                     {/* ── Form Card ── */}
                     <form
                         onSubmit={handleSubmit}
-                        className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-gray-100"
+                        className="overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-xl ring-1 ring-gray-100 dark:ring-slate-800"
                     >
                         {/* Header Banner */}
                         <div className="relative bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 px-8 py-6 text-white">
@@ -275,11 +275,11 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                     </Field>
                                 </div>
 
-                                <div className="rounded-2xl bg-indigo-50/60 p-3.5 text-xs text-indigo-800 flex items-center gap-2.5">
+                                <div className="rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 p-3.5 text-xs text-indigo-800 dark:text-indigo-300 flex items-center gap-2.5">
                                     <span className="font-bold">Trip Route Preview:</span>
-                                    <span className="font-black text-indigo-950">{data.origin_township}</span>
+                                    <span className="font-black text-indigo-950 dark:text-indigo-200">{data.origin_township}</span>
                                     <span>➔</span>
-                                    <span className="font-black text-indigo-950">{data.destination_township}</span>
+                                    <span className="font-black text-indigo-950 dark:text-indigo-200">{data.destination_township}</span>
                                 </div>
                             </Section>
 
@@ -371,7 +371,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                 Section 4 – Ride Rules & Preferences
                             ════════════════════════════════════════ */}
                             <Section title="Ride Preferences & Rules" icon="🛡️">
-                                <p className="text-xs text-gray-500 mb-2">
+                                <p className="text-xs text-gray-500 dark:text-[#A1A1AA] mb-2">
                                     Set expectations for your passengers to ensure a safe, comfortable commute.
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -383,21 +383,21 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                                 onClick={() => toggleRule(rule.key)}
                                                 className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-3.5 transition ${
                                                     isChecked
-                                                        ? 'border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500'
-                                                        : 'border-gray-200 bg-white hover:bg-gray-50'
+                                                        ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/40 shadow-sm ring-1 ring-indigo-500'
+                                                        : 'border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 hover:bg-gray-50 dark:hover:bg-slate-800'
                                                 }`}
                                             >
                                                 <input
                                                     type="checkbox"
                                                     checked={isChecked}
                                                     onChange={() => {}}
-                                                    className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                                                    className="mt-0.5 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-indigo-600 focus:ring-indigo-500"
                                                 />
                                                 <div className="flex-1 text-xs">
-                                                    <span className="font-bold text-gray-900 block flex items-center gap-1.5">
+                                                    <span className="font-bold text-gray-900 dark:text-white block flex items-center gap-1.5">
                                                         <span>{rule.badge}</span>
                                                     </span>
-                                                    <span className="text-gray-500 text-[11px] block mt-0.5">
+                                                    <span className="text-gray-500 dark:text-[#A1A1AA] text-[11px] block mt-0.5">
                                                         {rule.description}
                                                     </span>
                                                 </div>
@@ -411,7 +411,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                 Section 5 – Landmark Route Stops
                             ════════════════════════════════════════ */}
                             <Section title="Route Landmarks & Stops" icon="📍">
-                                <p className="mb-3 text-xs text-gray-500">
+                                <p className="mb-3 text-xs text-gray-500 dark:text-[#A1A1AA]">
                                     Define your starting point, destination, and any intermediate landmarks for pickup and drop-off along the commute.
                                 </p>
 
@@ -427,10 +427,10 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                                 key={idx}
                                                 className={`group relative rounded-2xl border p-4 transition-shadow hover:shadow-sm ${
                                                     isFirst
-                                                        ? 'border-indigo-200 bg-indigo-50/40'
+                                                        ? 'border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20'
                                                         : isLast
-                                                        ? 'border-emerald-200 bg-emerald-50/40'
-                                                        : 'border-gray-200 bg-gray-50'
+                                                        ? 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20'
+                                                        : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/40'
                                                 }`}
                                             >
                                                 <div className="mb-2 flex items-center justify-between">
@@ -441,12 +441,12 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                                                     ? 'bg-indigo-600 text-white'
                                                                     : isLast
                                                                     ? 'bg-emerald-600 text-white'
-                                                                    : 'bg-gray-200 text-gray-700'
+                                                                    : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
                                                             }`}
                                                         >
                                                             {stop.stop_order}
                                                         </span>
-                                                        <span className="text-xs font-bold uppercase tracking-wider text-gray-700">
+                                                        <span className="text-xs font-bold uppercase tracking-wider text-gray-700 dark:text-slate-300">
                                                             {isFirst
                                                                 ? `1. Starting Landmark (${data.origin_township})`
                                                                 : isLast
@@ -459,7 +459,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                                         <button
                                                             type="button"
                                                             onClick={() => removeStop(idx)}
-                                                            className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-red-50 hover:text-red-500 transition"
+                                                            className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500 transition"
                                                             title="Remove intermediate stop"
                                                         >
                                                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -471,7 +471,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
 
                                                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                                     <div>
-                                                        <label className="mb-1 block text-xs font-medium text-gray-600">
+                                                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-slate-300">
                                                             {isFirst ? 'Pickup Landmark / Start Location *' : isLast ? 'Destination Landmark *' : 'Intermediate Stop Landmark *'}
                                                         </label>
                                                         <input
@@ -491,7 +491,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                                     </div>
 
                                                     <div>
-                                                        <label className="mb-1 block text-xs font-medium text-gray-600">
+                                                        <label className="mb-1 block text-xs font-medium text-gray-600 dark:text-slate-300">
                                                             Estimated Time {isFirst ? '(Departure)' : '(optional)'}
                                                         </label>
                                                         <input
@@ -511,7 +511,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                 <button
                                     type="button"
                                     onClick={addIntermediateStop}
-                                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-indigo-200 py-2.5 text-xs font-bold text-indigo-600 transition hover:border-indigo-400 hover:bg-indigo-50"
+                                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-indigo-200 dark:border-indigo-900/60 py-2.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 transition hover:border-indigo-400 dark:hover:border-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
                                 >
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -537,10 +537,10 @@ export default function CreateRide({ vehicles, townships }: Props) {
                             </Section>
 
                             {/* ── Actions ── */}
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-6">
+                            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 pt-6">
                                 <Link
                                     href={route('dashboard')}
-                                    className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
+                                    className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 transition"
                                 >
                                     Cancel
                                 </Link>
@@ -548,7 +548,7 @@ export default function CreateRide({ vehicles, townships }: Props) {
                                 <button
                                     type="submit"
                                     disabled={processing || vehicles.length === 0}
-                                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-7 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-60"
+                                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-7 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 dark:shadow-none hover:from-indigo-700 hover:to-purple-700 transition disabled:opacity-60"
                                 >
                                     {processing ? 'Publishing Ride...' : 'Publish Ride'}
                                 </button>
@@ -576,7 +576,7 @@ function Section({
         <div>
             <div className="mb-3 flex items-center gap-2">
                 <span className="text-base">{icon}</span>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600">{title}</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-slate-300">{title}</h3>
             </div>
             <div className="space-y-4">{children}</div>
         </div>
@@ -599,15 +599,15 @@ function Field({
     return (
         <div>
             <div className="mb-1.5 flex items-baseline justify-between">
-                <label className="block text-xs font-bold text-gray-700">
+                <label className="block text-xs font-bold text-gray-700 dark:text-slate-200">
                     {label}
                     {required && <span className="ml-0.5 text-red-500">*</span>}
                 </label>
-                {hint && <span className="text-[11px] text-gray-400">{hint}</span>}
+                {hint && <span className="text-[11px] text-gray-400 dark:text-slate-500">{hint}</span>}
             </div>
             {children}
             {error && (
-                <p className="mt-1 text-xs text-red-600">
+                <p className="mt-1 text-xs text-red-600 dark:text-red-400">
                     {error}
                 </p>
             )}
@@ -619,20 +619,20 @@ function Field({
 
 function inputClass(hasError: boolean) {
     return [
-        'block w-full rounded-xl border px-3.5 py-2 text-sm text-gray-900 shadow-sm',
-        'placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition',
+        'block w-full rounded-xl border px-3.5 py-2 text-sm text-gray-900 dark:text-white shadow-sm',
+        'placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition',
         hasError
-            ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200'
-            : 'border-gray-200 bg-white focus:border-indigo-400 focus:ring-indigo-100',
+            ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 focus:border-red-400 focus:ring-red-200'
+            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-indigo-400 focus:ring-indigo-100 dark:focus:ring-indigo-900/40',
     ].join(' ');
 }
 
 function selectClass(hasError: boolean) {
     return [
-        'block w-full rounded-xl border px-3.5 py-2 text-sm text-gray-900 shadow-sm',
+        'block w-full rounded-xl border px-3.5 py-2 text-sm text-gray-900 dark:text-white shadow-sm',
         'focus:outline-none focus:ring-2 focus:ring-indigo-500 transition',
         hasError
-            ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-200'
-            : 'border-gray-200 bg-white focus:border-indigo-400 focus:ring-indigo-100',
+            ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 focus:border-red-400 focus:ring-red-200'
+            : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-indigo-400 focus:ring-indigo-100 dark:focus:ring-indigo-900/40',
     ].join(' ');
 }

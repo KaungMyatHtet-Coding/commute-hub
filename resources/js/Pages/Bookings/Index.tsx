@@ -94,13 +94,13 @@ interface Props extends PageProps {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_STYLES: Record<string, string> = {
-    pending:             'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-    accepted:            'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-    in_progress:         'bg-blue-100 text-blue-800 ring-1 ring-blue-300',
-    completed:           'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-    rejected:            'bg-red-100 text-red-800 ring-1 ring-red-200',
-    cancelled:           'bg-gray-100 text-gray-600 ring-1 ring-gray-200',
-    cancelled_by_driver: 'bg-red-100 text-red-700 ring-1 ring-red-200',
+    pending:             'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-700/50',
+    accepted:            'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-700/50',
+    in_progress:         'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-700/50',
+    completed:           'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-700/50',
+    rejected:            'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-700/50',
+    cancelled:           'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-400 ring-1 ring-gray-200 dark:ring-slate-700',
+    cancelled_by_driver: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-700/50',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -157,7 +157,7 @@ function OfferedRideCard({
         : 'Destination';
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] shadow-sm dark:shadow-black/40 transition hover:shadow-md dark:hover:shadow-black/60">
             {/* Status bar */}
             <div className={`h-1.5 w-full ${
                 ride.status === 'in_progress' ? 'bg-blue-500' :
@@ -172,35 +172,35 @@ function OfferedRideCard({
                 <div className="flex items-start justify-between gap-3">
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200">
+                            <span className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-700/50">
                                 Driving
                             </span>
                             <StatusBadge status={ride.status} />
                             {pendingCount > 0 && ride.status === 'scheduled' && (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-700/50">
                                     <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
                                     {pendingCount} Pending Request{pendingCount !== 1 ? 's' : ''}
                                 </span>
                             )}
                         </div>
-                        <p className="mt-2 font-semibold text-gray-900">
+                        <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                             {ride.vehicle
                                 ? `${ride.vehicle.make} ${ride.vehicle.model}`
                                 : 'Vehicle N/A'}
                         </p>
                         {ride.vehicle?.license_plate && (
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
                                 Plate: {ride.vehicle.license_plate}
                                 {ride.vehicle.color ? ` · ${ride.vehicle.color}` : ''}
                             </p>
                         )}
                     </div>
                     <div className="text-right shrink-0">
-                        <p className="text-lg font-bold text-indigo-600">
+                        <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                             {isFree ? 'Free' : `$${Number(ride.price_per_seat).toFixed(2)}`}
-                            <span className="text-xs font-normal text-gray-400"> / seat</span>
+                            <span className="text-xs font-normal text-gray-400 dark:text-gray-500"> / seat</span>
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
                             {ride.available_seats} of {ride.total_seats} seats free
                         </p>
                     </div>
@@ -209,25 +209,25 @@ function OfferedRideCard({
                 {/* Route */}
                 <div className="mt-4 flex items-start gap-3">
                     <div className="flex flex-col items-center pt-1">
-                        <div className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-                        <div className="my-1 h-8 w-px bg-gray-200" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+                        <div className="my-1 h-8 w-px bg-gray-200 dark:bg-slate-700" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-green-500 dark:bg-green-400" />
                     </div>
                     <div className="space-y-2">
                         <div>
-                            <p className="text-xs text-gray-400">Departure</p>
-                            <p className="text-sm font-medium text-gray-800">{origin}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Departure</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{origin}</p>
                         </div>
                         <div>
-                            <p className="text-xs text-gray-400">Destination</p>
-                            <p className="text-sm font-medium text-gray-800">{destination}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Destination</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{destination}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Departure Time */}
-                <div className="mt-4 flex items-center gap-1.5 text-sm text-gray-600">
-                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <div className="mt-4 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                    <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     {ride.departure_time ? formatDateTime(ride.departure_time) : '—'}
@@ -235,26 +235,26 @@ function OfferedRideCard({
 
                 {/* Cancellation Reason if cancelled */}
                 {ride.cancellation_reason && (
-                    <div className="mt-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-700">
+                    <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-900/20 p-2.5 text-xs text-red-700 dark:text-red-400 border border-transparent dark:border-red-800/40">
                         <span className="font-semibold">Cancelled: </span>
                         {ride.cancellation_reason}
                     </div>
                 )}
 
                 {/* Actions */}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-slate-800 pt-4">
                     <div className="flex items-center gap-2">
                         {ride.status === 'scheduled' && (
                             <>
                                 <button
                                     onClick={() => onStartRide(ride)}
-                                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                                    className="rounded-lg bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition"
                                 >
                                     Start Trip
                                 </button>
                                 <button
                                     onClick={() => onCancelRide(ride)}
-                                    className="rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                    className="rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                                 >
                                     Cancel
                                 </button>
@@ -263,7 +263,7 @@ function OfferedRideCard({
                         {ride.status === 'in_progress' && (
                             <button
                                 onClick={() => onCompleteRide(ride)}
-                                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                className="rounded-lg bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition"
                             >
                                 Complete Trip
                             </button>
@@ -272,7 +272,7 @@ function OfferedRideCard({
 
                     <Link
                         href={route('rides.show', ride.id)}
-                        className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition ms-auto"
+                        className="rounded-lg border border-gray-300 dark:border-slate-700 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition ms-auto"
                     >
                         Manage & View Ride
                     </Link>
@@ -312,7 +312,7 @@ function BookingCard({
         || (booking.ride?.stops && booking.ride.stops.length > 1 ? booking.ride.stops[booking.ride.stops.length - 1].stop_name : '—');
 
     return (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] shadow-sm dark:shadow-black/40 transition hover:shadow-md dark:hover:shadow-black/60">
             {/* Status bar */}
             <div className={`h-1.5 w-full ${
                 isCompleted                   ? 'bg-blue-500' :
@@ -327,26 +327,26 @@ function BookingCard({
                 <div className="flex items-start justify-between gap-3">
                     <div>
                         <StatusBadge status={booking.status} />
-                        <p className="mt-2 font-semibold text-gray-900">
+                        <p className="mt-2 font-semibold text-gray-900 dark:text-white">
                             {booking.ride?.vehicle
                                 ? `${booking.ride.vehicle.make} ${booking.ride.vehicle.model}`
                                 : 'Vehicle N/A'}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-[#A1A1AA]">
                             Driver: {booking.ride?.driver?.name ?? 'Driver'}
                             {booking.ride?.vehicle?.license_plate && (
                                 <>
-                                    <span className="mx-1.5 text-gray-300">·</span>
+                                    <span className="mx-1.5 text-gray-300 dark:text-slate-700">·</span>
                                     {booking.ride.vehicle.license_plate}
                                 </>
                             )}
                         </p>
                     </div>
                     <div className="text-right shrink-0">
-                        <p className="text-lg font-bold text-indigo-600">
+                        <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                             {isFree ? 'Free' : `$${totalFare}`}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
                             {booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''}
                         </p>
                     </div>
@@ -355,25 +355,25 @@ function BookingCard({
                 {/* Route */}
                 <div className="mt-4 flex items-start gap-3">
                     <div className="flex flex-col items-center pt-1">
-                        <div className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-                        <div className="my-1 h-8 w-px bg-gray-200" />
-                        <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 dark:bg-indigo-400" />
+                        <div className="my-1 h-8 w-px bg-gray-200 dark:bg-slate-700" />
+                        <div className="h-2.5 w-2.5 rounded-full bg-green-500 dark:bg-green-400" />
                     </div>
                     <div className="space-y-2">
                         <div>
-                            <p className="text-xs text-gray-400">Pickup</p>
-                            <p className="text-sm font-medium text-gray-800">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Pickup</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                                 {pickupName}
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
                                     {formatTime(booking.pickupStop?.estimated_time ?? null)}
                                 </span>
                             </p>
                         </div>
                         <div>
-                            <p className="text-xs text-gray-400">Dropoff</p>
-                            <p className="text-sm font-medium text-gray-800">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Dropoff</p>
+                            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                                 {dropoffName}
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-gray-500">
                                     {formatTime(booking.dropoffStop?.estimated_time ?? null)}
                                 </span>
                             </p>
@@ -382,8 +382,8 @@ function BookingCard({
                 </div>
 
                 {/* Departure */}
-                <div className="mt-4 flex items-center gap-1.5 text-sm text-gray-600">
-                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <div className="mt-4 flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                    <svg className="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     {booking.ride?.departure_time
@@ -393,19 +393,19 @@ function BookingCard({
 
                 {/* Reason note if cancelled */}
                 {booking.cancellation_reason && (
-                    <div className="mt-3 rounded-lg bg-red-50 p-2.5 text-xs text-red-700">
+                    <div className="mt-3 rounded-lg bg-red-50 dark:bg-red-900/20 p-2.5 text-xs text-red-700 dark:text-red-400 border border-transparent dark:border-red-800/40">
                         <span className="font-semibold">Reason: </span>
                         {booking.cancellation_reason}
                     </div>
                 )}
 
                 {/* Actions */}
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 pt-4">
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 dark:border-slate-800 pt-4">
                     <div className="flex items-center gap-2">
                         {booking.ride?.id && (
                             <Link
                                 href={route('rides.show', booking.ride.id)}
-                                className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                                className="rounded-lg border border-gray-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
                             >
                                 View Ride
                             </Link>
@@ -414,13 +414,13 @@ function BookingCard({
                         {/* Review option on completed trips */}
                         {isCompleted && (
                             myReview ? (
-                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-900/30 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-700/50">
                                     ★ {myReview.rating} Reviewed
                                 </span>
                             ) : (
                                 <button
                                     onClick={() => onReviewBooking(booking)}
-                                    className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-amber-600 transition"
+                                    className="rounded-lg bg-amber-500 hover:bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition"
                                 >
                                     Leave a Review
                                 </button>
@@ -431,7 +431,7 @@ function BookingCard({
                         {['pending', 'accepted'].includes(booking.status) && booking.ride?.status !== 'in_progress' && booking.ride?.status !== 'completed' && (
                             <button
                                 onClick={() => onCancelBooking(booking)}
-                                className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                                className="rounded-lg border border-red-200 dark:border-red-900/60 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
                             >
                                 Cancel Booking
                             </button>
@@ -439,17 +439,17 @@ function BookingCard({
                     </div>
 
                     {booking.status === 'pending' && (
-                        <p className="text-xs text-amber-600 italic">
+                        <p className="text-xs text-amber-600 dark:text-amber-400 italic">
                             Awaiting driver approval…
                         </p>
                     )}
                     {booking.status === 'rejected' && (
-                        <p className="text-xs text-red-500 italic">
+                        <p className="text-xs text-red-500 dark:text-red-400 italic">
                             Driver declined this request.
                         </p>
                     )}
                     {booking.status === 'cancelled_by_driver' && (
-                        <p className="text-xs text-red-500 italic">
+                        <p className="text-xs text-red-500 dark:text-red-400 italic">
                             Driver cancelled this trip.
                         </p>
                     )}
@@ -576,7 +576,7 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">My Trips</h2>
+                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-100">My Trips</h2>
             }
         >
             <Head title="My Trips" />
@@ -585,23 +585,23 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                 <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
 
                     {/* ── Main Dual Tab Switcher ── */}
-                    <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 pb-4">
-                        <div className="flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 dark:border-slate-800 pb-4">
+                        <div className="flex rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-1 shadow-sm dark:shadow-black/40">
                             <button
                                 onClick={() => setMainView('offering')}
                                 className={[
                                     'flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium transition',
                                     mainView === 'offering'
-                                        ? 'bg-indigo-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-800',
+                                        ? 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200',
                                 ].join(' ')}
                             >
                                 <span>Rides I'm Offering</span>
                                 <span
                                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                                         mainView === 'offering'
-                                            ? 'bg-indigo-700 text-white'
-                                            : 'bg-gray-100 text-gray-700'
+                                            ? 'bg-indigo-700 dark:bg-indigo-600 text-white'
+                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300'
                                     }`}
                                 >
                                     {offeredRides.length}
@@ -613,16 +613,16 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                                 className={[
                                     'flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-medium transition',
                                     mainView === 'riding'
-                                        ? 'bg-indigo-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-800',
+                                        ? 'bg-indigo-600 dark:bg-indigo-500 text-white shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200',
                                 ].join(' ')}
                             >
                                 <span>Rides I'm Riding</span>
                                 <span
                                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                                         mainView === 'riding'
-                                            ? 'bg-indigo-700 text-white'
-                                            : 'bg-gray-100 text-gray-700'
+                                            ? 'bg-indigo-700 dark:bg-indigo-600 text-white'
+                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300'
                                     }`}
                                 >
                                     {totalPassengerCount}
@@ -633,7 +633,7 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                         {mainView === 'offering' && (
                             <Link
                                 href={route('rides.create')}
-                                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-400 transition"
                             >
                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -670,7 +670,7 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                     {mainView === 'riding' && (
                         <div>
                             {/* Sub-tabs: Upcoming / Past */}
-                            <div className="mb-5 flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm w-fit">
+                            <div className="mb-5 flex rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-1 shadow-sm dark:shadow-black/40 w-fit">
                                 {(['upcoming', 'past'] as const).map((t) => (
                                     <button
                                         key={t}
@@ -678,8 +678,8 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                                         className={[
                                             'rounded-lg px-4 py-1.5 text-xs font-semibold transition',
                                             passengerTab === t
-                                                ? 'bg-gray-900 text-white shadow-sm'
-                                                : 'text-gray-600 hover:text-gray-800',
+                                                ? 'bg-gray-900 dark:bg-indigo-600 text-white shadow-sm'
+                                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200',
                                         ].join(' ')}
                                     >
                                         {t === 'upcoming'
@@ -786,16 +786,16 @@ function EmptyState({
     action?: { label: string; href: string };
 }) {
     return (
-        <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
-            <svg className="mb-4 h-14 w-14 text-gray-200" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+        <div className="flex flex-col items-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] py-16 text-center transition-colors">
+            <svg className="mb-4 h-14 w-14 text-gray-200 dark:text-slate-700" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
             </svg>
-            <p className="font-medium text-gray-400">{message}</p>
-            <p className="mt-1 text-sm text-gray-300">{sub}</p>
+            <p className="font-medium text-gray-400 dark:text-[#A1A1AA]">{message}</p>
+            <p className="mt-1 text-sm text-gray-300 dark:text-gray-600">{sub}</p>
             {action && (
                 <Link
                     href={action.href}
-                    className="mt-5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                    className="mt-5 rounded-xl bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition"
                 >
                     {action.label}
                 </Link>

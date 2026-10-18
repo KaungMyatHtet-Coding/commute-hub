@@ -23,9 +23,9 @@ const ICONS: Record<FlashType, JSX.Element> = {
 };
 
 const STYLES: Record<FlashType, string> = {
-    success: 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200',
-    error:   'bg-red-50 text-red-800 ring-1 ring-red-200',
-    warning: 'bg-amber-50 text-amber-800 ring-1 ring-amber-200',
+    success: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-200 dark:ring-emerald-700/50',
+    error:   'bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-700/50',
+    warning: 'bg-amber-50 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-700/50',
 };
 
 const ICON_STYLES: Record<FlashType, string> = {
@@ -66,7 +66,7 @@ export default function FlashToast() {
         <div
             role="alert"
             aria-live="polite"
-            className={`fixed bottom-6 right-6 z-50 flex max-w-sm items-start gap-3 rounded-2xl px-4 py-3.5 shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${STYLES[msg.type]}`}
+            className={`fixed bottom-24 md:bottom-6 right-4 left-4 sm:left-auto sm:right-6 sm:max-w-sm z-50 flex items-start gap-3 rounded-2xl px-4 py-3.5 shadow-xl dark:shadow-black/60 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${STYLES[msg.type]}`}
         >
             <span className={`mt-0.5 shrink-0 ${ICON_STYLES[msg.type]}`}>
                 {ICONS[msg.type]}

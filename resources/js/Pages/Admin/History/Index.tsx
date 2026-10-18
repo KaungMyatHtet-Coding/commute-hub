@@ -178,15 +178,15 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                     {/* Header bar */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Enterprise Ride Audit & History</h1>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Enterprise Ride Audit & History</h1>
+                            <p className="text-sm text-gray-500 dark:text-[#A1A1AA] mt-0.5">
                                 Search, audit, filter by date/township, and export full ride transcripts and passenger bookings for regulatory compliance.
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={handlePrintPDF}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition"
+                                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
@@ -200,7 +200,7 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                             </button>
                             <Link
                                 href={route('admin.dashboard')}
-                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
                             >
                                 ← Admin Dashboard
                             </Link>
@@ -223,34 +223,34 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                     {/* Filter Cards / Summary Stats */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filtered Rides</span>
-                            <div className="text-2xl font-black text-gray-900 mt-1">{summary.total_filtered_rides}</div>
-                            <span className="text-[11px] text-gray-500">Rides matching current filter</span>
+                        <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-800">
+                            <span className="text-xs font-semibold text-gray-400 dark:text-slate-400 uppercase tracking-wider">Filtered Rides</span>
+                            <div className="text-2xl font-black text-gray-900 dark:text-white mt-1">{summary.total_filtered_rides}</div>
+                            <span className="text-[11px] text-gray-500 dark:text-[#A1A1AA]">Rides matching current filter</span>
                         </div>
-                        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Booked Passenger Seats</span>
-                            <div className="text-2xl font-black text-indigo-600 mt-1">{summary.total_seats_taken}</div>
-                            <span className="text-[11px] text-gray-500">Total commuter seats occupied</span>
+                        <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-800">
+                            <span className="text-xs font-semibold text-gray-400 dark:text-slate-400 uppercase tracking-wider">Booked Passenger Seats</span>
+                            <div className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{summary.total_seats_taken}</div>
+                            <span className="text-[11px] text-gray-500 dark:text-[#A1A1AA]">Total commuter seats occupied</span>
                         </div>
-                        <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Estimated Commute Volume</span>
-                            <div className="text-2xl font-black text-emerald-600 mt-1">{formatCurrency(summary.total_revenue_est)}</div>
-                            <span className="text-[11px] text-gray-500">Estimated commuter fare value</span>
+                        <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-5 shadow-sm border border-gray-100 dark:border-slate-800">
+                            <span className="text-xs font-semibold text-gray-400 dark:text-slate-400 uppercase tracking-wider">Estimated Commute Volume</span>
+                            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(summary.total_revenue_est)}</div>
+                            <span className="text-[11px] text-gray-500 dark:text-[#A1A1AA]">Estimated commuter fare value</span>
                         </div>
                     </div>
 
                     {/* Filter Controls Box */}
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 no-print">
-                        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-4">Search & Filter Criteria</h3>
+                    <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 no-print">
+                        <h3 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-4">Search & Filter Criteria</h3>
                         <form onSubmit={handleApplyFilters} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                             {/* Status Filter */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Ride Status</label>
+                                <label className="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Ride Status</label>
                                 <select
                                     value={formFilters.status}
                                     onChange={(e) => setFormFilters({ ...formFilters, status: e.target.value })}
-                                    className="w-full text-xs rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="all">All Statuses</option>
                                     <option value="scheduled">Scheduled</option>
@@ -262,33 +262,33 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                             {/* Specific Date */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Specific Day</label>
+                                <label className="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Specific Day</label>
                                 <input
                                     type="date"
                                     value={formFilters.date}
                                     onChange={(e) => setFormFilters({ ...formFilters, date: e.target.value })}
-                                    className="w-full text-xs rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 />
                             </div>
 
                             {/* Month Select */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Month</label>
+                                <label className="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Month</label>
                                 <input
                                     type="month"
                                     value={formFilters.month}
                                     onChange={(e) => setFormFilters({ ...formFilters, month: e.target.value })}
-                                    className="w-full text-xs rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 />
                             </div>
 
                             {/* Yangon Township */}
                             <div>
-                                <label className="block text-[11px] font-semibold text-gray-500 mb-1">Yangon Township</label>
+                                <label className="block text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">Yangon Township</label>
                                 <select
                                     value={formFilters.township}
                                     onChange={(e) => setFormFilters({ ...formFilters, township: e.target.value })}
-                                    className="w-full text-xs rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500"
+                                    className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:border-indigo-500 focus:ring-indigo-500"
                                 >
                                     <option value="">All Townships</option>
                                     {townships.map((t) => (
@@ -310,7 +310,7 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                 <button
                                     type="button"
                                     onClick={handleResetFilters}
-                                    className="py-2 px-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-semibold transition"
+                                    className="py-2 px-3 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition"
                                 >
                                     Reset
                                 </button>
@@ -319,18 +319,18 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                     </div>
 
                     {/* History Table */}
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                            <h2 className="text-sm font-bold text-gray-900">
+                    <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 space-y-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+                            <h2 className="text-sm font-bold text-gray-900 dark:text-white">
                                 Ride Records ({rides.total} Total)
                             </h2>
-                            <span className="text-xs text-gray-400 no-print">Click 'Audit' for complete passenger booking breakdown</span>
+                            <span className="text-xs text-gray-400 dark:text-slate-500 no-print">Click 'Audit' for complete passenger booking breakdown</span>
                         </div>
 
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs text-gray-600">
+                            <table className="w-full text-left text-xs text-gray-600 dark:text-slate-300">
                                 <thead>
-                                    <tr className="border-b border-gray-100 text-gray-400 uppercase tracking-wider text-[10px]">
+                                    <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 dark:text-slate-500 uppercase tracking-wider text-[10px]">
                                         <th className="py-3 px-3">Trip ID & Time</th>
                                         <th className="py-3 px-3">Driver</th>
                                         <th className="py-3 px-3">Route (Yangon)</th>
@@ -340,27 +340,27 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                         <th className="py-3 px-3 text-right no-print">Audit</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
                                     {rides.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="py-8 text-center text-gray-400">
+                                            <td colSpan={7} className="py-8 text-center text-gray-400 dark:text-slate-500">
                                                 No ride records found matching the specified filter criteria.
                                             </td>
                                         </tr>
                                     ) : (
                                         rides.data.map((ride) => (
-                                            <tr key={ride.id} className="hover:bg-gray-50/60 transition">
+                                            <tr key={ride.id} className="hover:bg-gray-50/60 dark:hover:bg-slate-800/50 transition">
                                                 {/* ID & Departure */}
                                                 <td className="py-3.5 px-3">
-                                                    <div className="font-bold text-gray-900">#{ride.id}</div>
-                                                    <div className="text-[11px] text-gray-500">
+                                                    <div className="font-bold text-gray-900 dark:text-white">#{ride.id}</div>
+                                                    <div className="text-[11px] text-gray-500 dark:text-[#A1A1AA]">
                                                         {new Date(ride.departure_time).toLocaleDateString([], {
                                                             month: 'short',
                                                             day: 'numeric',
                                                             year: 'numeric',
                                                         })}
                                                     </div>
-                                                    <div className="text-[10px] font-mono text-gray-400">
+                                                    <div className="text-[10px] font-mono text-gray-400 dark:text-slate-500">
                                                         {new Date(ride.departure_time).toLocaleTimeString([], {
                                                             hour: '2-digit',
                                                             minute: '2-digit',
@@ -375,17 +375,17 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                                             <img
                                                                 src={`/storage/${ride.driver.passport_photo_path}`}
                                                                 alt={ride.driver.name}
-                                                                className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-200"
+                                                                className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-200 dark:ring-slate-700"
                                                             />
                                                         ) : (
-                                                            <div className="w-7 h-7 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
+                                                            <div className="w-7 h-7 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-[10px]">
                                                                 {ride.driver.name.charAt(0).toUpperCase()}
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <div className="font-semibold text-gray-900">{ride.driver.name}</div>
+                                                            <div className="font-semibold text-gray-900 dark:text-white">{ride.driver.name}</div>
                                                             {ride.vehicle && (
-                                                                <div className="text-[10px] text-gray-400 font-mono">
+                                                                <div className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">
                                                                     {ride.vehicle.make} • {ride.vehicle.license_plate}
                                                                 </div>
                                                             )}
@@ -395,10 +395,10 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                                                 {/* Route */}
                                                 <td className="py-3.5 px-3">
-                                                    <div className="font-semibold text-gray-900">
-                                                        {ride.origin_township} <span className="text-gray-400">→</span> {ride.destination_township}
+                                                    <div className="font-semibold text-gray-900 dark:text-white">
+                                                        {ride.origin_township} <span className="text-gray-400 dark:text-slate-500">→</span> {ride.destination_township}
                                                     </div>
-                                                    <div className="text-[10px] text-gray-400">
+                                                    <div className="text-[10px] text-gray-400 dark:text-slate-500">
                                                         {ride.stops.length} stop{ride.stops.length !== 1 ? 's' : ''} scheduled
                                                     </div>
                                                 </td>
@@ -408,18 +408,18 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                                     <span
                                                         className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                                             ride.status === 'completed'
-                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
                                                                 : ride.status === 'in_progress'
-                                                                ? 'bg-blue-100 text-blue-700'
+                                                                ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
                                                                 : ride.status === 'cancelled'
-                                                                ? 'bg-red-100 text-red-700'
-                                                                : 'bg-amber-100 text-amber-700'
+                                                                ? 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400'
+                                                                : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                                                         }`}
                                                     >
                                                         {ride.status.replace('_', ' ')}
                                                     </span>
                                                     {ride.cancellation_reason && (
-                                                        <div className="text-[10px] text-red-500 italic truncate max-w-[150px]">
+                                                        <div className="text-[10px] text-red-500 dark:text-red-400 italic truncate max-w-[150px]">
                                                             "{ride.cancellation_reason}"
                                                         </div>
                                                     )}
@@ -427,17 +427,17 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                                                 {/* Seats & Price */}
                                                 <td className="py-3.5 px-3">
-                                                    <div className="font-bold text-gray-900">
+                                                    <div className="font-bold text-gray-900 dark:text-white">
                                                         {new Intl.NumberFormat('en-US').format(Number(ride.price_per_seat))} MMK
                                                     </div>
-                                                    <div className="text-[10px] text-gray-500">
+                                                    <div className="text-[10px] text-gray-500 dark:text-[#A1A1AA]">
                                                         {ride.booked_seats} of {ride.total_seats} seats booked
                                                     </div>
                                                 </td>
 
                                                 {/* Bookings Count */}
                                                 <td className="py-3.5 px-3">
-                                                    <span className="font-medium text-gray-700">
+                                                    <span className="font-medium text-gray-700 dark:text-slate-300">
                                                         {ride.bookings.length} passenger{ride.bookings.length !== 1 ? 's' : ''}
                                                     </span>
                                                 </td>
@@ -446,7 +446,7 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                                 <td className="py-3.5 px-3 text-right no-print">
                                                     <button
                                                         onClick={() => setSelectedRide(ride)}
-                                                        className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                                        className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
                                                     >
                                                         Audit Trip
                                                     </button>
@@ -460,8 +460,8 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                         {/* Pagination */}
                         {rides.last_page > 1 && (
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-xs no-print">
-                                <span className="text-gray-500">
+                            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 pt-4 text-xs no-print">
+                                <span className="text-gray-500 dark:text-[#A1A1AA]">
                                     Showing page {rides.current_page} of {rides.last_page} ({rides.total} total)
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -474,8 +474,8 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                                 link.active
                                                     ? 'bg-indigo-600 text-white font-bold'
                                                     : link.url
-                                                    ? 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                                                    : 'text-gray-300 cursor-not-allowed'
+                                                    ? 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700'
+                                                    : 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
                                             }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -490,21 +490,21 @@ export default function Index({ rides, summary, filters, townships }: Props) {
             {/* Ride Audit Details Modal */}
             {selectedRide && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm animate-fade-in overflow-y-auto no-print">
-                    <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-100 my-8">
+                    <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-2xl ring-1 ring-gray-100 dark:ring-slate-800 my-8">
                         {/* Modal Header */}
-                        <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50/50">
+                        <div className="border-b border-gray-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between bg-gray-50/50 dark:bg-slate-900/50">
                             <div>
-                                <h3 className="text-base font-bold text-gray-900">
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                                     Ride Audit Transcript #{selectedRide.id}
                                 </h3>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
                                     {selectedRide.origin_township} → {selectedRide.destination_township} •{' '}
                                     {new Date(selectedRide.departure_time).toLocaleString()}
                                 </p>
                             </div>
                             <button
                                 onClick={() => setSelectedRide(null)}
-                                className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition"
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition"
                             >
                                 ✕
                             </button>
@@ -514,43 +514,43 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
                             {/* Trip Status & Driver Overview */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2 text-xs">
-                                    <div className="font-bold text-gray-700 uppercase tracking-wider">Driver Profile</div>
+                                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/70 border border-gray-100 dark:border-slate-800 space-y-2 text-xs">
+                                    <div className="font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Driver Profile</div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Name:</span>{' '}
-                                        <span className="font-semibold text-gray-900">{selectedRide.driver.name}</span>
+                                        <span className="text-gray-400 dark:text-slate-500">Name:</span>{' '}
+                                        <span className="font-semibold text-gray-900 dark:text-white">{selectedRide.driver.name}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Contact:</span>{' '}
-                                        <span className="font-mono text-gray-900">{selectedRide.driver.phone || 'N/A'}</span>
+                                        <span className="text-gray-400 dark:text-slate-500">Contact:</span>{' '}
+                                        <span className="font-mono text-gray-900 dark:text-white">{selectedRide.driver.phone || 'N/A'}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Email:</span>{' '}
-                                        <span className="text-gray-900">{selectedRide.driver.email}</span>
+                                        <span className="text-gray-400 dark:text-slate-500">Email:</span>{' '}
+                                        <span className="text-gray-900 dark:text-white">{selectedRide.driver.email}</span>
                                     </div>
                                 </div>
 
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2 text-xs">
-                                    <div className="font-bold text-gray-700 uppercase tracking-wider">Vehicle & Capacity</div>
+                                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/70 border border-gray-100 dark:border-slate-800 space-y-2 text-xs">
+                                    <div className="font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Vehicle & Capacity</div>
                                     {selectedRide.vehicle ? (
                                         <>
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">Vehicle:</span>{' '}
-                                                <span className="font-semibold text-gray-900">
+                                                <span className="text-gray-400 dark:text-slate-500">Vehicle:</span>{' '}
+                                                <span className="font-semibold text-gray-900 dark:text-white">
                                                     {selectedRide.vehicle.make} {selectedRide.vehicle.model} ({selectedRide.vehicle.color || 'Standard'})
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-gray-400">License Plate:</span>{' '}
-                                                <span className="font-mono font-bold text-gray-900">{selectedRide.vehicle.license_plate}</span>
+                                                <span className="text-gray-400 dark:text-slate-500">License Plate:</span>{' '}
+                                                <span className="font-mono font-bold text-gray-900 dark:text-white">{selectedRide.vehicle.license_plate}</span>
                                             </div>
                                         </>
                                     ) : (
-                                        <div className="text-gray-400">No vehicle record linked</div>
+                                        <div className="text-gray-400 dark:text-slate-500">No vehicle record linked</div>
                                     )}
                                     <div className="flex justify-between">
-                                        <span className="text-gray-400">Seat Occupancy:</span>{' '}
-                                        <span className="font-bold text-indigo-600">
+                                        <span className="text-gray-400 dark:text-slate-500">Seat Occupancy:</span>{' '}
+                                        <span className="font-bold text-indigo-600 dark:text-indigo-400">
                                             {selectedRide.booked_seats} / {selectedRide.total_seats} Seats Booked
                                         </span>
                                     </div>
@@ -559,16 +559,16 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                             {/* Stops List */}
                             <div className="space-y-2">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Trip Route & Stops</h4>
-                                <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 space-y-1.5">
+                                <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Trip Route & Stops</h4>
+                                <div className="p-3 bg-gray-50 dark:bg-slate-900/70 rounded-2xl border border-gray-100 dark:border-slate-800 space-y-1.5">
                                     {selectedRide.stops.map((stop, idx) => (
                                         <div key={stop.id} className="flex items-center gap-3 text-xs">
-                                            <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[10px]">
+                                            <span className="w-5 h-5 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-[10px]">
                                                 {idx + 1}
                                             </span>
-                                            <span className="font-medium text-gray-900">{stop.stop_name}</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{stop.stop_name}</span>
                                             {stop.estimated_time && (
-                                                <span className="text-gray-400 text-[10px]">
+                                                <span className="text-gray-400 dark:text-slate-500 text-[10px]">
                                                     ({new Date(stop.estimated_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
                                                 </span>
                                             )}
@@ -579,17 +579,17 @@ export default function Index({ rides, summary, filters, townships }: Props) {
 
                             {/* Bookings Audit Table */}
                             <div className="space-y-2">
-                                <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">
                                     Passenger Bookings Audit ({selectedRide.bookings.length})
                                 </h4>
                                 {selectedRide.bookings.length === 0 ? (
-                                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 text-center text-xs text-gray-400">
+                                    <div className="p-4 bg-gray-50 dark:bg-slate-900/70 rounded-2xl border border-gray-100 dark:border-slate-800 text-center text-xs text-gray-400 dark:text-slate-500">
                                         No passenger bookings recorded for this ride.
                                     </div>
                                 ) : (
-                                    <div className="overflow-x-auto rounded-2xl border border-gray-100">
-                                        <table className="w-full text-left text-xs text-gray-600">
-                                            <thead className="bg-gray-50 text-[10px] text-gray-400 uppercase tracking-wider">
+                                    <div className="overflow-x-auto rounded-2xl border border-gray-100 dark:border-slate-800">
+                                        <table className="w-full text-left text-xs text-gray-600 dark:text-slate-300">
+                                            <thead className="bg-gray-50 dark:bg-slate-900/50 text-[10px] text-gray-400 dark:text-slate-500 uppercase tracking-wider">
                                                 <tr>
                                                     <th className="py-2.5 px-3">Passenger</th>
                                                     <th className="py-2.5 px-3">Pickup / Drop-off</th>
@@ -598,40 +598,40 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                                                     <th className="py-2.5 px-3">Status</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                                                 {selectedRide.bookings.map((b) => (
                                                     <tr key={b.id}>
                                                         <td className="py-2.5 px-3">
-                                                            <div className="font-semibold text-gray-900">{b.passenger.name}</div>
+                                                            <div className="font-semibold text-gray-900 dark:text-white">{b.passenger.name}</div>
                                                             {b.passenger.phone && (
-                                                                <div className="text-[10px] text-gray-400 font-mono">{b.passenger.phone}</div>
+                                                                <div className="text-[10px] text-gray-400 dark:text-slate-500 font-mono">{b.passenger.phone}</div>
                                                             )}
                                                         </td>
                                                         <td className="py-2.5 px-3">
-                                                            <div className="text-[11px] text-gray-800">
+                                                            <div className="text-[11px] text-gray-800 dark:text-slate-200">
                                                                 {b.pickup_stop || 'Start'} → {b.dropoff_stop || 'Destination'}
                                                             </div>
                                                         </td>
-                                                        <td className="py-2.5 px-3 font-semibold text-gray-900">{b.seats_booked}</td>
-                                                        <td className="py-2.5 px-3 font-mono font-bold text-gray-900">
+                                                        <td className="py-2.5 px-3 font-semibold text-gray-900 dark:text-white">{b.seats_booked}</td>
+                                                        <td className="py-2.5 px-3 font-mono font-bold text-gray-900 dark:text-white">
                                                             {formatCurrency(b.total_fare)}
                                                         </td>
                                                         <td className="py-2.5 px-3">
                                                             <span
                                                                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                                                     b.status === 'completed'
-                                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400'
                                                                         : b.status === 'accepted'
-                                                                        ? 'bg-blue-100 text-blue-700'
+                                                                        ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400'
                                                                         : b.status === 'cancelled'
-                                                                        ? 'bg-red-100 text-red-700'
-                                                                        : 'bg-amber-100 text-amber-700'
+                                                                        ? 'bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400'
+                                                                        : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400'
                                                                 }`}
                                                             >
                                                                 {b.status}
                                                             </span>
                                                             {b.cancellation_reason && (
-                                                                <div className="text-[10px] text-red-500 italic truncate max-w-[120px]">
+                                                                <div className="text-[10px] text-red-500 dark:text-red-400 italic truncate max-w-[120px]">
                                                                     "{b.cancellation_reason}"
                                                                 </div>
                                                             )}
@@ -647,10 +647,10 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                             {/* Ride Rules */}
                             {selectedRide.ride_rules && selectedRide.ride_rules.length > 0 && (
                                 <div className="space-y-1">
-                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Ride Rules</h4>
+                                    <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Driver Ride Rules</h4>
                                     <div className="flex flex-wrap gap-1.5">
                                         {selectedRide.ride_rules.map((rule, idx) => (
-                                            <span key={idx} className="px-2.5 py-1 rounded-xl bg-gray-100 text-gray-700 text-xs font-medium">
+                                            <span key={idx} className="px-2.5 py-1 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 text-xs font-medium">
                                                 ✓ {rule}
                                             </span>
                                         ))}
@@ -660,11 +660,11 @@ export default function Index({ rides, summary, filters, townships }: Props) {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="border-t border-gray-100 px-6 py-4 bg-gray-50 flex items-center justify-end">
+                        <div className="border-t border-gray-100 dark:border-slate-800 px-6 py-4 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-end">
                             <button
                                 type="button"
                                 onClick={() => setSelectedRide(null)}
-                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-200 transition"
+                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800 transition"
                             >
                                 Close Audit Log
                             </button>

@@ -120,9 +120,9 @@ function HistoryIcon() {
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
     return (
-        <div className="flex flex-col gap-1 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
+        <div className="flex flex-col gap-1 rounded-2xl bg-white dark:bg-[#1C1C22] p-5 shadow-sm dark:shadow-black/40 ring-1 ring-gray-100 dark:ring-slate-800 transition-colors">
             <span className={`text-2xl font-bold ${color}`}>{value}</span>
-            <span className="text-sm text-gray-500">{label}</span>
+            <span className="text-sm text-gray-500 dark:text-[#A1A1AA]">{label}</span>
         </div>
     );
 }
@@ -226,15 +226,15 @@ export default function Dashboard() {
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-800">
-                            Welcome back, <span className="text-indigo-600">{user.name}</span> 👋
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+                            Welcome back, <span className="text-indigo-600 dark:text-indigo-400">{user.name}</span> 👋
                         </h2>
-                        <p className="mt-0.5 text-sm text-gray-500">
+                        <p className="mt-0.5 text-sm text-gray-500 dark:text-[#A1A1AA]">
                             {isDriver ? 'Ready to offer a ride today?' : 'Find your next commute partner.'}
                         </p>
                     </div>
                     {isDriver && (
-                        <span className="hidden items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 ring-1 ring-indigo-200 sm:inline-flex">
+                        <span className="hidden items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-200 dark:ring-indigo-700/50 sm:inline-flex">
                             <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
@@ -246,35 +246,35 @@ export default function Dashboard() {
         >
             <Head title="Dashboard" />
 
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 py-10">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/30 to-purple-50/30 dark:from-[#121212] dark:via-[#16161c] dark:to-[#121212] py-8 sm:py-10 transition-colors">
                 <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
 
                     {/* ── Stats row ── */}
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        <StatCard label="Rides Taken" value={stats?.rides_taken ?? '—'} color="text-sky-600" />
-                        <StatCard label="Rides Offered" value={isDriver ? (stats?.rides_offered ?? '—') : 'N/A'} color="text-indigo-600" />
+                        <StatCard label="Rides Taken" value={stats?.rides_taken ?? '—'} color="text-sky-600 dark:text-sky-400" />
+                        <StatCard label="Rides Offered" value={isDriver ? (stats?.rides_offered ?? '—') : 'N/A'} color="text-indigo-600 dark:text-indigo-400" />
                         <StatCard
                             label="Rating"
                             value={stats?.average_rating && stats.average_rating > 0 ? `★ ${stats.average_rating}` : '★ New'}
-                            color="text-amber-500"
+                            color="text-amber-500 dark:text-amber-400"
                         />
-                        <StatCard label="Reviews" value={stats?.review_count ?? 0} color="text-emerald-600" />
+                        <StatCard label="Reviews" value={stats?.review_count ?? 0} color="text-emerald-600 dark:text-emerald-400" />
                     </div>
 
                     {/* ── Active Ride Action Banner (Driver) ── */}
                     {activeRide && (
-                        <div className="overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-indigo-100">
+                        <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] p-6 shadow-sm dark:shadow-black/40 ring-1 ring-indigo-100 dark:ring-slate-800 transition-colors">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                                             Active Driving Trip
                                         </span>
                                         <span
                                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                                                 activeRide.status === 'in_progress'
-                                                    ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-300'
-                                                    : 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-300'
+                                                    ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-700/50'
+                                                    : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-700/50'
                                             }`}
                                         >
                                             {activeRide.status === 'in_progress' && (
@@ -283,10 +283,10 @@ export default function Dashboard() {
                                             {activeRide.status === 'in_progress' ? 'In Progress' : 'Scheduled'}
                                         </span>
                                     </div>
-                                    <p className="mt-1 font-bold text-gray-900">
+                                    <p className="mt-1 font-bold text-gray-900 dark:text-white">
                                         {activeRide.stops?.[0]?.stop_name ?? 'Origin'} → {activeRide.stops && activeRide.stops.length > 1 ? activeRide.stops[activeRide.stops.length - 1].stop_name : 'Destination'}
                                     </p>
-                                    <p className="text-xs text-gray-500 mt-0.5">
+                                    <p className="text-xs text-gray-500 dark:text-[#A1A1AA] mt-0.5">
                                         {activeRide.vehicle ? `${activeRide.vehicle.make} ${activeRide.vehicle.model}` : 'Vehicle'} · {formatDateTime(activeRide.departure_time)}
                                     </p>
                                 </div>
@@ -306,7 +306,7 @@ export default function Dashboard() {
                                                 });
                                                 setConfirmModalOpen(true);
                                             }}
-                                            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition"
                                         >
                                             Start Trip
                                         </button>
@@ -325,14 +325,14 @@ export default function Dashboard() {
                                                 });
                                                 setConfirmModalOpen(true);
                                             }}
-                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 px-4 py-2 text-xs font-semibold text-white shadow-sm transition"
                                         >
                                             Complete Trip
                                         </button>
                                     )}
                                     <Link
                                         href={route('rides.show', activeRide.id)}
-                                        className="rounded-xl border border-gray-300 px-3.5 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition"
+                                        className="rounded-xl border border-gray-300 dark:border-slate-700 px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
                                     >
                                         View Trip
                                     </Link>
@@ -343,20 +343,20 @@ export default function Dashboard() {
 
                     {/* ── Quick action cards ── */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">Quick Actions</h3>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Quick Actions</h3>
                         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {cards.map((card) => (
                                 <div
                                     key={card.title}
-                                    className={`group relative overflow-hidden rounded-3xl bg-white shadow-sm ring-1 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${card.ring}`}
+                                    className={`group relative overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-sm dark:shadow-black/40 ring-1 dark:ring-slate-800 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-black/60 ${card.ring}`}
                                 >
                                     <div className={`h-1.5 w-full bg-gradient-to-r ${card.gradient}`} />
                                     <div className="p-6">
                                         <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${card.gradient} text-white shadow-md`}>
                                             {card.icon}
                                         </div>
-                                        <h4 className="text-base font-bold text-gray-800">{card.title}</h4>
-                                        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{card.description}</p>
+                                        <h4 className="text-base font-bold text-gray-800 dark:text-white">{card.title}</h4>
+                                        <p className="mt-1.5 text-sm leading-relaxed text-gray-500 dark:text-[#A1A1AA]">{card.description}</p>
                                         <div className="mt-5">
                                             <Link
                                                 href={card.href}
@@ -376,10 +376,10 @@ export default function Dashboard() {
 
                     {/* ── Recent activity ── */}
                     <div>
-                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">Recent Activity</h3>
+                        <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Recent Activity</h3>
                         {recentBookings && recentBookings.length > 0 ? (
-                            <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100">
-                                <ul className="divide-y divide-gray-100">
+                            <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-sm dark:shadow-black/40 ring-1 ring-gray-100 dark:ring-slate-800 transition-colors">
+                                <ul className="divide-y divide-gray-100 dark:divide-slate-800">
                                     {recentBookings.map((booking) => {
                                         const rideId = booking.ride_id || booking.ride?.id;
                                         const isDriverForRide = Boolean(
@@ -395,14 +395,14 @@ export default function Dashboard() {
                                                 : 'Destination');
 
                                         const content = (
-                                            <div className="flex items-center gap-4 px-5 py-4 transition hover:bg-gray-50/80">
+                                            <div className="flex items-center gap-4 px-5 py-4 transition hover:bg-gray-50/80 dark:hover:bg-slate-800/50">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 flex-wrap">
                                                         <StatusBadge status={booking.status} />
-                                                        <span className="text-sm font-medium text-gray-800 truncate">
+                                                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                                                             {isDriverForRide ? (
                                                                 <>
-                                                                    <span className="font-semibold text-indigo-600">Passenger:</span>{' '}
+                                                                    <span className="font-semibold text-indigo-600 dark:text-indigo-400">Passenger:</span>{' '}
                                                                     {booking.passenger?.name ?? 'Passenger'}
                                                                 </>
                                                             ) : (
@@ -415,11 +415,11 @@ export default function Dashboard() {
                                                             )}
                                                         </span>
                                                     </div>
-                                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
-                                                        <span className="font-medium text-gray-700">{pickupName}</span>
-                                                        <span className="text-gray-400">→</span>
-                                                        <span className="font-medium text-gray-700">{dropoffName}</span>
-                                                        <span className="text-gray-300">·</span>
+                                                    <div className="mt-1 flex items-center gap-2 text-xs text-gray-500 dark:text-[#A1A1AA]">
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">{pickupName}</span>
+                                                        <span className="text-gray-400 dark:text-gray-500">→</span>
+                                                        <span className="font-medium text-gray-700 dark:text-gray-300">{dropoffName}</span>
+                                                        <span className="text-gray-300 dark:text-slate-700">·</span>
                                                         <span>
                                                             {booking.ride?.departure_time
                                                                 ? formatDateTime(booking.ride.departure_time)
@@ -428,12 +428,12 @@ export default function Dashboard() {
                                                     </div>
                                                 </div>
                                                 <div className="shrink-0 text-right">
-                                                    <p className="text-sm font-semibold text-gray-900">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
                                                         ${(Number(booking.price_per_seat) * booking.seats_booked).toFixed(2)}
                                                     </p>
-                                                    <p className="text-xs text-gray-400">{booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-gray-500">{booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''}</p>
                                                 </div>
-                                                <div className="shrink-0 text-gray-400">
+                                                <div className="shrink-0 text-gray-400 dark:text-gray-500">
                                                     <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                                     </svg>
@@ -455,22 +455,22 @@ export default function Dashboard() {
                                     })}
                                 </ul>
                                 {route().has('bookings.index') && (
-                                    <div className="border-t border-gray-100 px-5 py-3">
-                                        <Link href={route('bookings.index')} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                                    <div className="border-t border-gray-100 dark:border-slate-800 px-5 py-3">
+                                        <Link href={route('bookings.index')} className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300">
                                             View all trips →
                                         </Link>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 bg-white py-16 text-center">
-                                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-300">
+                            <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] py-16 text-center transition-colors">
+                                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-600">
                                     <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                     </svg>
                                 </div>
-                                <p className="text-sm font-medium text-gray-400">No recent activity yet</p>
-                                <p className="mt-1 text-xs text-gray-300">Your upcoming and past rides will appear here.</p>
+                                <p className="text-sm font-medium text-gray-400 dark:text-[#A1A1AA]">No recent activity yet</p>
+                                <p className="mt-1 text-xs text-gray-300 dark:text-gray-600">Your upcoming and past rides will appear here.</p>
                             </div>
                         )}
                     </div>

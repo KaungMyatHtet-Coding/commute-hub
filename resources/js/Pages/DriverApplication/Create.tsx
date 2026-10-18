@@ -84,10 +84,10 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
         <AuthenticatedLayout
             header={
                 <div>
-                    <h2 className="text-xl font-bold leading-tight text-gray-800">
+                    <h2 className="text-xl font-bold leading-tight text-gray-800 dark:text-white">
                         Become a CommuteHub Driver
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-1 text-sm text-gray-500 dark:text-[#A1A1AA]">
                         Share your daily commute, help fellow passengers, and offset your fuel costs.
                     </p>
                 </div>
@@ -100,23 +100,23 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
 
                     {/* Status Alert Banners */}
                     {isPending && (
-                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900 shadow-sm">
+                        <div className="rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 p-6 text-amber-900 dark:text-amber-200 shadow-sm">
                             <div className="flex items-start gap-4">
-                                <div className="rounded-xl bg-amber-100 p-2.5 text-amber-700">
+                                <div className="rounded-xl bg-amber-100 dark:bg-amber-900/50 p-2.5 text-amber-700 dark:text-amber-300">
                                     <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-base font-bold text-amber-900">Application Under Review</h3>
-                                    <p className="mt-1 text-sm text-amber-800">
+                                    <h3 className="text-base font-bold text-amber-900 dark:text-amber-200">Application Under Review</h3>
+                                    <p className="mt-1 text-sm text-amber-800 dark:text-amber-300">
                                         Your driver application and vehicle details are currently being reviewed by our administrators.
                                         Once verified, you will be granted the driver role and can immediately start posting rides!
                                     </p>
                                     <div className="mt-3">
                                         <Link
                                             href={route('dashboard')}
-                                            className="inline-flex items-center text-xs font-semibold text-amber-900 underline hover:text-amber-950"
+                                            className="inline-flex items-center text-xs font-semibold text-amber-900 dark:text-amber-300 underline hover:text-amber-950 dark:hover:text-amber-200"
                                         >
                                             ← Back to Dashboard
                                         </Link>
@@ -127,19 +127,19 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                     )}
 
                     {isRejected && (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-900 shadow-sm">
+                        <div className="rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-6 text-red-900 dark:text-red-200 shadow-sm">
                             <div className="flex items-start gap-4">
-                                <div className="rounded-xl bg-red-100 p-2.5 text-red-700">
+                                <div className="rounded-xl bg-red-100 dark:bg-red-900/50 p-2.5 text-red-700 dark:text-red-300">
                                     <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                                     </svg>
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="text-base font-bold text-red-900">Previous Application Rejected</h3>
-                                    <p className="mt-1 text-sm text-red-800">
+                                    <h3 className="text-base font-bold text-red-900 dark:text-red-200">Previous Application Rejected</h3>
+                                    <p className="mt-1 text-sm text-red-800 dark:text-red-300">
                                         Reason: <span className="font-semibold">{rejectionReason || 'Details provided did not meet verification criteria.'}</span>
                                     </p>
-                                    <p className="mt-1 text-xs text-red-700">
+                                    <p className="mt-1 text-xs text-red-700 dark:text-red-400">
                                         You can update your license or vehicle details below and resubmit for verification.
                                     </p>
                                 </div>
@@ -148,25 +148,25 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                     )}
 
                     {/* Step A: Read-Only Verified KYC Safety Information (Anti-Spoofing) */}
-                    <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-100">
-                        <div className="border-b border-gray-100 bg-indigo-50/50 px-8 py-5">
+                    <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-sm ring-1 ring-gray-100 dark:ring-slate-800">
+                        <div className="border-b border-gray-100 dark:border-slate-800 bg-indigo-50/50 dark:bg-indigo-950/30 px-8 py-5">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                                         Step 1 of 2: Verified Identity
                                     </span>
-                                    <h3 className="text-base font-bold text-gray-900">
+                                    <h3 className="text-base font-bold text-gray-900 dark:text-white">
                                         Your Passenger KYC Information (Locked)
                                     </h3>
                                 </div>
-                                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 ring-1 ring-inset ring-emerald-200 dark:ring-emerald-800">
                                     ✓ Anti-Spoofing Protected
                                 </span>
                             </div>
                         </div>
 
                         <div className="p-8">
-                            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100">
+                            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100 dark:border-slate-800">
                                 {user.passport_photo_path ? (
                                     <img
                                         src={`/storage/${user.passport_photo_path}`}
@@ -174,49 +174,49 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                         className="h-20 w-20 rounded-2xl object-cover ring-2 ring-indigo-500 shadow"
                                     />
                                 ) : (
-                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 font-bold text-2xl shadow">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 font-bold text-2xl shadow">
                                         {user.name.charAt(0)}
                                     </div>
                                 )}
                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                                     <div>
-                                        <span className="text-gray-400 uppercase tracking-wider block">Legal Name</span>
-                                        <span className="font-bold text-gray-900 text-sm">{user.name}</span>
+                                        <span className="text-gray-400 dark:text-slate-500 uppercase tracking-wider block">Legal Name</span>
+                                        <span className="font-bold text-gray-900 dark:text-white text-sm">{user.name}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-400 uppercase tracking-wider block">Email Address</span>
-                                        <span className="font-semibold text-gray-800">{user.email}</span>
+                                        <span className="text-gray-400 dark:text-slate-500 uppercase tracking-wider block">Email Address</span>
+                                        <span className="font-semibold text-gray-800 dark:text-slate-200">{user.email}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-400 uppercase tracking-wider block">Phone Number</span>
-                                        <span className="font-semibold text-gray-800">{user.phone || 'N/A'}</span>
+                                        <span className="text-gray-400 dark:text-slate-500 uppercase tracking-wider block">Phone Number</span>
+                                        <span className="font-semibold text-gray-800 dark:text-slate-200">{user.phone || 'N/A'}</span>
                                     </div>
                                     <div>
-                                        <span className="text-gray-400 uppercase tracking-wider block">NRC Number</span>
-                                        <span className="font-mono font-bold text-indigo-700">{user.nrc_number || 'N/A'}</span>
+                                        <span className="text-gray-400 dark:text-slate-500 uppercase tracking-wider block">NRC Number</span>
+                                        <span className="font-mono font-bold text-indigo-700 dark:text-indigo-400">{user.nrc_number || 'N/A'}</span>
                                     </div>
                                 </div>
                             </div>
-                            <p className="mt-3 text-xs text-gray-400">
-                                To update personal details, please edit your <Link href={route('profile.edit')} className="text-indigo-600 underline">Profile KYC page</Link>.
+                            <p className="mt-3 text-xs text-gray-400 dark:text-slate-500">
+                                To update personal details, please edit your <Link href={route('profile.edit')} className="text-indigo-600 dark:text-indigo-400 underline">Profile KYC page</Link>.
                             </p>
                         </div>
                     </div>
 
                     {/* Step B: Driver License & Vehicle Details Form */}
-                    <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-100">
-                        <div className="border-b border-gray-100 bg-gray-50/70 px-8 py-5">
-                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                    <div className="overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-sm ring-1 ring-gray-100 dark:ring-slate-800">
+                        <div className="border-b border-gray-100 dark:border-slate-800 bg-gray-50/70 dark:bg-slate-800/40 px-8 py-5">
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                                 Step 2 of 2: Driver & Vehicle Registration
                             </span>
-                            <h3 className="text-base font-bold text-gray-900">Driver License & Vehicle Details</h3>
+                            <h3 className="text-base font-bold text-gray-900 dark:text-white">Driver License & Vehicle Details</h3>
                         </div>
 
                         <form onSubmit={submit} className="p-8 space-y-8">
                             {/* Section 1: Driver License Details & Photo */}
                             <div>
-                                <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600">
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs text-indigo-700">1</span>
+                                <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-xs text-indigo-700 dark:text-indigo-300">1</span>
                                     Driver License Details & Card Photo
                                 </h4>
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -235,7 +235,7 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                         <InputError message={errors.driver_license_number} className="mt-2" />
                                     </div>
 
-                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 p-4">
+                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                                         <InputLabel value="Driver License Card Photo (Required for Driver Verification)" />
                                         <div className="mt-2 flex items-center gap-3">
                                             {previews.driver_license_photo ? (
@@ -245,12 +245,12 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                                     className="h-16 w-24 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                                 />
                                             ) : (
-                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                                     <span className="text-[10px] font-bold">License Card</span>
                                                 </div>
                                             )}
                                             <div className="min-w-0 flex-1">
-                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
                                                     Choose Photo
                                                     <input
                                                         type="file"
@@ -260,7 +260,7 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.driver_license_photo || undefined}>
+                                                <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.driver_license_photo || undefined}>
                                                     {fileNames.driver_license_photo || (user.driver_license_photo_path ? 'Current license photo saved' : 'No file chosen')}
                                                 </span>
                                             </div>
@@ -271,9 +271,9 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                             </div>
 
                             {/* Section 2: Vehicle Details & Photo */}
-                            <div className="border-t border-gray-100 pt-6">
-                                <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600">
-                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs text-indigo-700">2</span>
+                            <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
+                                <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-xs text-indigo-700 dark:text-indigo-300">2</span>
                                     Vehicle Specifications & Photo
                                 </h4>
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -359,7 +359,7 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                             id="seat_capacity"
                                             name="seat_capacity"
                                             value={data.seat_capacity}
-                                            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                                            className="mt-1 block w-full rounded-xl border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                                             onChange={(e) => setData('seat_capacity', e.target.value)}
                                             required
                                             disabled={isPending}
@@ -371,10 +371,10 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                             ))}
                                         </select>
                                         <InputError message={errors.seat_capacity} className="mt-2" />
-                                        <p className="mt-1 text-xs text-gray-400">Available seats for passengers (typically 1–4).</p>
+                                        <p className="mt-1 text-xs text-gray-400 dark:text-slate-500">Available seats for passengers (typically 1–4).</p>
                                     </div>
 
-                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 p-4">
+                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                                         <InputLabel value="Vehicle Photo (Clearly showing license plate number)" />
                                         <div className="mt-2 flex items-center gap-3">
                                             {previews.vehicle_photo ? (
@@ -384,12 +384,12 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                                     className="h-16 w-24 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                                 />
                                             ) : (
-                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                                     <span className="text-[10px] font-bold">Vehicle Photo</span>
                                                 </div>
                                             )}
                                             <div className="min-w-0 flex-1">
-                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
                                                     Choose Photo
                                                     <input
                                                         type="file"
@@ -399,7 +399,7 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                                         className="hidden"
                                                     />
                                                 </label>
-                                                <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.vehicle_photo || undefined}>
+                                                <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.vehicle_photo || undefined}>
                                                     {fileNames.vehicle_photo || (existingVehicle?.vehicle_photo_path ? 'Current vehicle photo saved' : 'No file chosen')}
                                                 </span>
                                             </div>
@@ -410,10 +410,10 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                             </div>
 
                             {/* Submit Actions */}
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-6">
+                            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 pt-6">
                                 <Link
                                     href={route('dashboard')}
-                                    className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                                    className="text-sm font-medium text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
                                 >
                                     Cancel
                                 </Link>

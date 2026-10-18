@@ -140,11 +140,11 @@ function formatTime(iso: string | null): string {
 
 function StopTimeline({ stops }: { stops: RideStop[] }) {
     if (stops.length === 0) {
-        return <p className="text-sm italic text-gray-400">No stops listed.</p>;
+        return <p className="text-sm italic text-gray-400 dark:text-slate-500">No stops listed.</p>;
     }
 
     return (
-        <ol className="relative border-s border-indigo-200 ms-3">
+        <ol className="relative border-s border-indigo-200 dark:border-indigo-900/60 ms-3">
             {stops.map((stop, idx) => {
                 const isFirst = idx === 0;
                 const isLast = idx === stops.length - 1;
@@ -152,12 +152,12 @@ function StopTimeline({ stops }: { stops: RideStop[] }) {
                     <li key={stop.id} className="mb-6 ms-6">
                         <span
                             className={[
-                                'absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white',
+                                'absolute -start-3 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white dark:ring-[#1C1C22]',
                                 isFirst
                                     ? 'bg-indigo-600'
                                     : isLast
                                     ? 'bg-green-500'
-                                    : 'bg-indigo-200',
+                                    : 'bg-indigo-200 dark:bg-indigo-950',
                             ].join(' ')}
                         >
                             {isFirst ? (
@@ -169,21 +169,21 @@ function StopTimeline({ stops }: { stops: RideStop[] }) {
                                     <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zm0 0v8" />
                                 </svg>
                             ) : (
-                                <svg className="h-2.5 w-2.5 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
+                                <svg className="h-2.5 w-2.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
                                     <circle cx="12" cy="12" r="6" />
                                 </svg>
                             )}
                         </span>
                         <div className="flex items-baseline gap-3">
-                            <h3 className="text-sm font-semibold text-gray-800">{stop.stop_name}</h3>
+                            <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-100">{stop.stop_name}</h3>
                             {stop.estimated_time && (
-                                <time className="text-xs text-gray-400">{formatTime(stop.estimated_time)}</time>
+                                <time className="text-xs text-gray-400 dark:text-slate-400">{formatTime(stop.estimated_time)}</time>
                             )}
                             {isFirst && (
-                                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Departure</span>
+                                <span className="rounded-full bg-indigo-100 dark:bg-indigo-950/70 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:text-indigo-300">Departure</span>
                             )}
                             {isLast && stops.length > 1 && (
-                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Destination</span>
+                                <span className="rounded-full bg-green-100 dark:bg-green-950/70 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">Destination</span>
                             )}
                         </div>
                     </li>
@@ -223,16 +223,16 @@ function DriverBookingsManagement({
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3">
+        <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm space-y-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 dark:border-slate-800 pb-3">
                 <div>
-                    <h3 className="text-base font-bold text-gray-900">Passenger Booking Requests</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Passenger Booking Requests</h3>
+                    <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
                         {bookings.length} total · {pendingBookings.length} pending · {acceptedCount} confirmed
                     </p>
                 </div>
                 {pendingBookings.length > 0 && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
                         {pendingBookings.length} action needed
                     </span>
@@ -240,7 +240,7 @@ function DriverBookingsManagement({
             </div>
 
             {bookings.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-gray-200 py-8 text-center text-sm text-gray-400">
+                <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-800 py-8 text-center text-sm text-gray-400 dark:text-slate-500">
                     No booking requests received for this ride yet.
                 </div>
             ) : (
@@ -250,7 +250,7 @@ function DriverBookingsManagement({
                         <div className="space-y-3">
                             <div className="flex items-center gap-2">
                                 <span className="h-2 w-2 rounded-full bg-amber-500" />
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">
                                     Pending Requests ({pendingBookings.length})
                                 </h4>
                             </div>
@@ -260,30 +260,30 @@ function DriverBookingsManagement({
                                     return (
                                         <div
                                             key={booking.id}
-                                            className="rounded-xl border border-amber-300 bg-amber-50/50 p-4 shadow-sm ring-1 ring-amber-200/60"
+                                            className="rounded-xl border border-amber-300 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20 p-4 shadow-sm ring-1 ring-amber-200/60 dark:ring-amber-900/30"
                                         >
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-800">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50 font-bold text-amber-800 dark:text-amber-300">
                                                         {booking.passenger.name.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2 flex-wrap">
-                                                            <p className="font-semibold text-gray-900">{booking.passenger.name}</p>
-                                                            <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-300">
+                                                            <p className="font-semibold text-gray-900 dark:text-white">{booking.passenger.name}</p>
+                                                            <span className="inline-flex rounded-full bg-amber-100 dark:bg-amber-950/60 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300 ring-1 ring-amber-300 dark:ring-amber-800">
                                                                 Pending Review
                                                             </span>
                                                         </div>
-                                                        <p className="text-xs text-gray-500">{booking.passenger.email}</p>
-                                                        <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-700 flex-wrap">
-                                                            <span className="font-medium text-gray-800">{booking.pickupStop?.stop_name ?? '—'}</span>
+                                                        <p className="text-xs text-gray-500 dark:text-slate-400">{booking.passenger.email}</p>
+                                                        <div className="mt-1 flex items-center gap-1.5 text-xs text-gray-700 dark:text-slate-300 flex-wrap">
+                                                            <span className="font-medium text-gray-800 dark:text-slate-200">{booking.pickupStop?.stop_name ?? '—'}</span>
                                                             <span className="text-gray-400">→</span>
-                                                            <span className="font-medium text-gray-800">{booking.dropoffStop?.stop_name ?? '—'}</span>
-                                                            <span className="text-gray-300">·</span>
-                                                            <span className="font-semibold text-indigo-700">
+                                                            <span className="font-medium text-gray-800 dark:text-slate-200">{booking.dropoffStop?.stop_name ?? '—'}</span>
+                                                            <span className="text-gray-300 dark:text-slate-600">·</span>
+                                                            <span className="font-semibold text-indigo-700 dark:text-indigo-400">
                                                                 {booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''}
                                                             </span>
-                                                            <span className="text-gray-500">(${totalCost})</span>
+                                                            <span className="text-gray-500 dark:text-slate-400">(${totalCost})</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -301,7 +301,7 @@ function DriverBookingsManagement({
                                                     </button>
                                                     <button
                                                         onClick={() => handleReject(booking.id, booking.passenger.name)}
-                                                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                                                        className="inline-flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
                                                     >
                                                         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -320,7 +320,7 @@ function DriverBookingsManagement({
                     {/* ── Confirmed & Other Bookings Section ── */}
                     {otherBookings.length > 0 && (
                         <div className="space-y-3 pt-2">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500">
                                 Confirmed & Past Bookings ({otherBookings.length})
                             </h4>
                             <div className="space-y-2">
@@ -337,25 +337,25 @@ function DriverBookingsManagement({
                                     return (
                                         <div
                                             key={booking.id}
-                                            className="rounded-xl border border-gray-100 bg-gray-50/70 p-3.5 transition"
+                                            className="rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/70 dark:bg-slate-800/40 p-3.5 transition"
                                         >
                                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-700">
+                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-200 dark:bg-slate-700 text-xs font-semibold text-gray-700 dark:text-slate-200">
                                                         {booking.passenger.name.charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2 flex-wrap">
-                                                            <p className="font-semibold text-gray-900 text-sm">{booking.passenger.name}</p>
+                                                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{booking.passenger.name}</p>
                                                             <span
                                                                 className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
                                                                     booking.status === 'completed'
-                                                                        ? 'bg-blue-100 text-blue-800'
+                                                                        ? 'bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300'
                                                                         : booking.status === 'accepted'
-                                                                        ? 'bg-emerald-100 text-emerald-800'
+                                                                        ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300'
                                                                         : isCancelled
-                                                                        ? 'bg-gray-100 text-gray-600'
-                                                                        : 'bg-red-100 text-red-800'
+                                                                        ? 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
+                                                                        : 'bg-red-100 dark:bg-red-950/70 text-red-800 dark:text-red-300'
                                                                 }`}
                                                             >
                                                                 {booking.status === 'cancelled_by_driver'
@@ -363,15 +363,15 @@ function DriverBookingsManagement({
                                                                     : booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                                                             </span>
                                                         </div>
-                                                        <div className="mt-0.5 text-xs text-gray-500">
+                                                        <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">
                                                             <span>{booking.pickupStop?.stop_name ?? '—'}</span>
                                                             <span className="mx-1 text-gray-400">→</span>
                                                             <span>{booking.dropoffStop?.stop_name ?? '—'}</span>
-                                                            <span className="mx-1.5 text-gray-300">·</span>
+                                                            <span className="mx-1.5 text-gray-300 dark:text-slate-600">·</span>
                                                             <span>{booking.seats_booked} seat{booking.seats_booked !== 1 ? 's' : ''} (${totalCost})</span>
                                                         </div>
                                                         {booking.cancellation_reason && (
-                                                            <p className="mt-1 text-xs text-red-600 italic">
+                                                            <p className="mt-1 text-xs text-red-600 dark:text-red-400 italic">
                                                                 Cancellation Reason: {booking.cancellation_reason}
                                                             </p>
                                                         )}
@@ -382,7 +382,7 @@ function DriverBookingsManagement({
                                                     {/* Review options on completed trips */}
                                                     {isCompleted && (
                                                         driverReview ? (
-                                                            <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                                            <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800">
                                                                 ★ {driverReview.rating} Reviewed
                                                             </span>
                                                         ) : (
@@ -399,7 +399,7 @@ function DriverBookingsManagement({
                                                     {isAccepted && ride.status !== 'in_progress' && ride.status !== 'completed' && (
                                                         <button
                                                             onClick={() => handleReject(booking.id, booking.passenger.name)}
-                                                            className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                                            className="rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
                                                         >
                                                             Cancel Seat
                                                         </button>
@@ -446,7 +446,7 @@ function BookingForm({
 
     if (isDriver) {
         return (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="rounded-xl border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30 p-4 text-sm text-amber-800 dark:text-amber-300">
                 You are the driver of this ride. You cannot book your own ride.
             </div>
         );
@@ -454,7 +454,7 @@ function BookingForm({
 
     if (existingBooking && ['pending', 'accepted', 'completed'].includes(existingBooking.status)) {
         return (
-            <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+            <div className="rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/30 p-4 text-sm text-indigo-900 dark:text-indigo-200">
                 <p className="font-semibold">
                     {existingBooking.status === 'completed'
                         ? '✓ Trip Completed'
@@ -462,7 +462,7 @@ function BookingForm({
                         ? '✓ Booking Confirmed'
                         : '⏳ Your booking is currently Pending'}
                 </p>
-                <p className="mt-1 text-xs text-indigo-700">
+                <p className="mt-1 text-xs text-indigo-700 dark:text-indigo-300">
                     You have reserved {existingBooking.seats_booked} seat{existingBooking.seats_booked !== 1 ? 's' : ''} on this ride.
                 </p>
             </div>
@@ -471,7 +471,7 @@ function BookingForm({
 
     if (ride.status === 'cancelled') {
         return (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-300">
                 This ride has been cancelled by the driver.
             </div>
         );
@@ -479,7 +479,7 @@ function BookingForm({
 
     if (ride.status === 'in_progress' || ride.status === 'completed') {
         return (
-            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+            <div className="rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/40 p-4 text-sm text-gray-600 dark:text-slate-400">
                 This ride is already {ride.status === 'in_progress' ? 'in progress' : 'completed'} and no longer accepting bookings.
             </div>
         );
@@ -487,7 +487,7 @@ function BookingForm({
 
     if (ride.available_seats === 0) {
         return (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-300">
                 This ride is fully booked. No seats available.
             </div>
         );
@@ -546,13 +546,13 @@ function BookingForm({
         <form onSubmit={handleSubmit} className="space-y-4">
             {/* Pickup stop */}
             <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-[#A1A1AA] mb-1">
                     Pickup Stop
                 </label>
                 <select
                     value={data.pickup_stop_id}
                     onChange={(e) => handlePickupChange(e.target.value)}
-                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="w-full rounded-xl border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                 >
                     <option value="">Select pickup landmark…</option>
@@ -568,20 +568,20 @@ function BookingForm({
                     })}
                 </select>
                 {errors.pickup_stop_id && (
-                    <p className="mt-1 text-xs text-red-600">{errors.pickup_stop_id}</p>
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.pickup_stop_id}</p>
                 )}
             </div>
 
             {/* Dropoff stop */}
             <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-[#A1A1AA] mb-1">
                     Drop-off Stop
                 </label>
                 <select
                     value={data.dropoff_stop_id}
                     onChange={(e) => setData('dropoff_stop_id', e.target.value)}
                     disabled={!data.pickup_stop_id}
-                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400"
+                    className="w-full rounded-xl border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-400 dark:disabled:bg-slate-800/40 dark:disabled:text-slate-500"
                     required
                 >
                     <option value="">Select drop-off landmark…</option>
@@ -597,19 +597,19 @@ function BookingForm({
                     })}
                 </select>
                 {errors.dropoff_stop_id && (
-                    <p className="mt-1 text-xs text-red-600">{errors.dropoff_stop_id}</p>
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.dropoff_stop_id}</p>
                 )}
             </div>
 
             {/* Seats */}
             <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-[#A1A1AA] mb-1">
                     Seats Needed
                 </label>
                 <select
                     value={data.seats_booked}
                     onChange={(e) => setData('seats_booked', e.target.value)}
-                    className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="w-full rounded-xl border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                     {availableOptions.map((n) => (
                         <option key={n} value={String(n)}>
@@ -618,18 +618,18 @@ function BookingForm({
                     ))}
                 </select>
                 {errors.seats_booked && (
-                    <p className="mt-1 text-xs text-red-600">{errors.seats_booked}</p>
+                    <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.seats_booked}</p>
                 )}
             </div>
 
             {/* Price preview */}
             {data.seats_booked && Number(ride.price_per_seat) > 0 && (
-                <div className="rounded-lg bg-indigo-50 px-4 py-3 text-sm">
-                    <span className="font-medium text-indigo-700">Estimated cost: </span>
-                    <span className="font-bold text-indigo-900">
+                <div className="rounded-lg bg-indigo-50 dark:bg-indigo-950/40 px-4 py-3 text-sm">
+                    <span className="font-medium text-indigo-700 dark:text-indigo-300">Estimated cost: </span>
+                    <span className="font-bold text-indigo-900 dark:text-indigo-100">
                         ${(Number(data.seats_booked) * Number(ride.price_per_seat)).toFixed(2)}
                     </span>
-                    <span className="text-indigo-500">
+                    <span className="text-indigo-500 dark:text-indigo-400">
                         {' '}({data.seats_booked} × ${Number(ride.price_per_seat).toFixed(2)})
                     </span>
                 </div>
@@ -638,7 +638,7 @@ function BookingForm({
             <button
                 type="submit"
                 disabled={processing || !data.pickup_stop_id || !data.dropoff_stop_id}
-                className="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                className="w-full rounded-xl bg-indigo-600 dark:bg-indigo-500 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 transition"
             >
                 {processing ? 'Submitting…' : 'Request Booking'}
             </button>
@@ -794,12 +794,12 @@ export default function RidesShow({
                 <div className="flex items-center gap-3">
                     <Link
                         href={route('rides.index')}
-                        className="text-sm text-indigo-600 hover:underline"
+                        className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
                     >
                         ← Rides
                     </Link>
-                    <span className="text-gray-300">/</span>
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    <span className="text-gray-300 dark:text-slate-600">/</span>
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-white">
                         Ride Details
                     </h2>
                 </div>
@@ -812,22 +812,22 @@ export default function RidesShow({
 
                     {/* ── Driver Lifecycle Action Banner (Owner view) ── */}
                     {isOwnerDriver && (
-                        <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 via-white to-purple-50 p-5 shadow-sm">
+                        <div className="overflow-hidden rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-r from-indigo-50 via-white to-purple-50 dark:from-indigo-950/40 dark:via-[#1C1C22] dark:to-purple-950/30 p-5 shadow-sm">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                        <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                                             Trip Management
                                         </span>
                                         <span
                                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                                                 ride.status === 'in_progress'
-                                                    ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-300'
+                                                    ? 'bg-blue-100 dark:bg-blue-950/70 text-blue-800 dark:text-blue-300 ring-1 ring-blue-300 dark:ring-blue-800'
                                                     : ride.status === 'completed'
-                                                    ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300'
+                                                    ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-300 ring-1 ring-emerald-300 dark:ring-emerald-800'
                                                     : ride.status === 'cancelled'
-                                                    ? 'bg-red-100 text-red-800 ring-1 ring-red-300'
-                                                    : 'bg-indigo-100 text-indigo-800 ring-1 ring-indigo-300'
+                                                    ? 'bg-red-100 dark:bg-red-950/70 text-red-800 dark:text-red-300 ring-1 ring-red-300 dark:ring-red-800'
+                                                    : 'bg-indigo-100 dark:bg-indigo-950/70 text-indigo-800 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-800'
                                             }`}
                                         >
                                             {ride.status === 'in_progress' && (
@@ -838,7 +838,7 @@ export default function RidesShow({
                                                 : ride.status.charAt(0).toUpperCase() + ride.status.slice(1)}
                                         </span>
                                     </div>
-                                    <p className="mt-1 text-sm font-semibold text-gray-900">
+                                    <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
                                         {ride.status === 'scheduled' && 'Ready to hit the road? Start the trip when you begin driving.'}
                                         {ride.status === 'in_progress' && 'Trip is currently in progress! Cancellations are locked.'}
                                         {ride.status === 'completed' && 'Trip completed! You and your passengers can exchange mutual reviews below.'}
@@ -863,7 +863,7 @@ export default function RidesShow({
                                                     setCancelModalMode('driver');
                                                     setCancelModalOpen(true);
                                                 }}
-                                                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                                                className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
                                             >
                                                 Cancel Trip
                                             </button>
@@ -873,7 +873,7 @@ export default function RidesShow({
                                     {ride.status === 'in_progress' && (
                                         <button
                                             onClick={handleCompleteTrip}
-                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                            className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 dark:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
                                         >
                                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -888,9 +888,9 @@ export default function RidesShow({
 
                     {/* ── Cancelled Banner (if ride cancelled) ── */}
                     {ride.status === 'cancelled' && (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
-                            <h3 className="text-sm font-bold text-red-800">Trip Cancelled by Driver</h3>
-                            <p className="mt-1 text-xs text-red-700">
+                        <div className="rounded-2xl border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-5">
+                            <h3 className="text-sm font-bold text-red-800 dark:text-red-300">Trip Cancelled by Driver</h3>
+                            <p className="mt-1 text-xs text-red-700 dark:text-red-400">
                                 {ride.cancellation_reason
                                     ? `Reason: ${ride.cancellation_reason}`
                                     : 'This trip has been cancelled.'}
@@ -933,19 +933,19 @@ export default function RidesShow({
                             )}
 
                             {/* Route & Rules Township Banner */}
-                            <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 p-5 shadow-sm">
+                            <div className="overflow-hidden rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 dark:from-indigo-950/30 dark:via-[#1C1C22] dark:to-purple-950/20 p-5 shadow-sm">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div>
-                                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600 mb-1">
+                                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">
                                             <span>Yangon Commute Route</span>
                                         </div>
                                         <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="text-lg font-extrabold text-gray-900">{ride.origin_township}</span>
+                                            <span className="text-lg font-extrabold text-gray-900 dark:text-white">{ride.origin_township}</span>
                                             <span className="text-gray-400 font-bold">➔</span>
-                                            <span className="text-lg font-extrabold text-indigo-700">{ride.destination_township}</span>
+                                            <span className="text-lg font-extrabold text-indigo-700 dark:text-indigo-400">{ride.destination_township}</span>
                                         </div>
-                                        <p className="mt-1 text-xs text-gray-500">
-                                            Departure: <span className="font-medium text-gray-800">{formatDateTime(ride.departure_time)}</span>
+                                        <p className="mt-1 text-xs text-gray-500 dark:text-[#A1A1AA]">
+                                            Departure: <span className="font-medium text-gray-800 dark:text-slate-200">{formatDateTime(ride.departure_time)}</span>
                                         </p>
                                     </div>
 
@@ -953,18 +953,18 @@ export default function RidesShow({
                                     <button
                                         type="button"
                                         onClick={handleShareTrip}
-                                        className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50 hover:border-indigo-300 transition shrink-0"
+                                        className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-sm hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:border-indigo-300 dark:hover:border-indigo-700 transition shrink-0"
                                     >
                                         {shareCopied ? (
                                             <>
-                                                <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                                 </svg>
-                                                <span className="text-emerald-700">Copied to Clipboard!</span>
+                                                <span className="text-emerald-700 dark:text-emerald-400">Copied to Clipboard!</span>
                                             </>
                                         ) : (
                                             <>
-                                                <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                <svg className="h-4 w-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
                                                 </svg>
                                                 <span>Share Trip / Emergency Info</span>
@@ -975,8 +975,8 @@ export default function RidesShow({
 
                                 {/* Ride Rules Badges */}
                                 {ride.ride_rules && ride.ride_rules.length > 0 && (
-                                    <div className="mt-4 border-t border-indigo-100 pt-3">
-                                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-2">
+                                    <div className="mt-4 border-t border-indigo-100 dark:border-slate-800 pt-3">
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400 block mb-2">
                                             Ride Preferences & Rules
                                         </span>
                                         <div className="flex flex-wrap gap-2">
@@ -989,8 +989,8 @@ export default function RidesShow({
                                                         key={rule.key}
                                                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
                                                             isLadies
-                                                                ? 'bg-pink-100 text-pink-800 ring-1 ring-pink-300'
-                                                                : 'bg-white text-gray-700 ring-1 ring-gray-200 shadow-2xs'
+                                                                ? 'bg-pink-100 dark:bg-pink-950/70 text-pink-800 dark:text-pink-300 ring-1 ring-pink-300 dark:ring-pink-800'
+                                                                : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 ring-1 ring-gray-200 dark:ring-slate-700 shadow-2xs'
                                                         }`}
                                                     >
                                                         <span>{rule.icon}</span>
@@ -1004,8 +1004,8 @@ export default function RidesShow({
                             </div>
 
                             {/* Driver Card */}
-                            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                            <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
+                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
                                     Driver Information
                                 </h3>
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1014,41 +1014,41 @@ export default function RidesShow({
                                             <img
                                                 src={`/storage/${ride.driver.passport_photo_path}`}
                                                 alt={ride.driver.name}
-                                                className="h-14 w-14 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
+                                                className="h-14 w-14 rounded-full object-cover border-2 border-indigo-200 dark:border-indigo-800 shadow-sm"
                                             />
                                         ) : (
-                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-600">
+                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-950/70 text-xl font-bold text-indigo-600 dark:text-indigo-400">
                                                 {ride.driver.name.charAt(0).toUpperCase()}
                                             </div>
                                         )}
                                         <div>
                                             <div className="flex items-center gap-2 flex-wrap">
-                                                <p className="font-bold text-gray-900 text-base">{ride.driver.name}</p>
+                                                <p className="font-bold text-gray-900 dark:text-white text-base">{ride.driver.name}</p>
                                                 {ride.driver.gender && (
                                                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
                                                         ride.driver.gender === 'female'
-                                                            ? 'bg-pink-50 text-pink-700 ring-1 ring-pink-200'
-                                                            : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                                                            ? 'bg-pink-50 dark:bg-pink-950/50 text-pink-700 dark:text-pink-300 ring-1 ring-pink-200 dark:ring-pink-800'
+                                                            : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 ring-1 ring-blue-200 dark:ring-blue-800'
                                                     }`}>
                                                         {ride.driver.gender}
                                                     </span>
                                                 )}
                                                 {maskedLicense && (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 dark:bg-purple-950/50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 dark:text-purple-300 ring-1 ring-purple-200 dark:ring-purple-800">
                                                         <span>🛡️ License</span>
                                                         <span>{maskedLicense}</span>
                                                     </span>
                                                 )}
                                             </div>
 
-                                            <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                                            <div className="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-[#A1A1AA]">
                                                 {driverRating > 0 ? (
-                                                    <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
+                                                    <span className="inline-flex items-center gap-1 font-semibold text-amber-700 dark:text-amber-400">
                                                         ★ {driverRating.toFixed(1)}
-                                                        <span className="text-gray-400 font-normal">({driverReviewCount} reviews)</span>
+                                                        <span className="text-gray-400 dark:text-slate-500 font-normal">({driverReviewCount} reviews)</span>
                                                     </span>
                                                 ) : (
-                                                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+                                                    <span className="rounded-full bg-gray-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-gray-500 dark:text-slate-400">
                                                         New Driver
                                                     </span>
                                                 )}
@@ -1074,8 +1074,8 @@ export default function RidesShow({
                             </div>
 
                             {/* Vehicle Card with Photo & Lightbox */}
-                            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                            <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
+                                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
                                     Vehicle Inspection
                                 </h3>
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1083,20 +1083,20 @@ export default function RidesShow({
                                         {ride.vehicle.vehicle_photo_path ? (
                                             <div
                                                 onClick={() => setVehicleLightboxOpen(true)}
-                                                className="group relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-gray-50 shadow-sm transition hover:opacity-90"
+                                                className="group relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 shadow-sm transition hover:opacity-90"
                                             >
                                                 <img
                                                     src={`/storage/${ride.vehicle.vehicle_photo_path}`}
                                                     alt={`${ride.vehicle.make} ${ride.vehicle.model}`}
                                                     className="h-full w-full object-cover transition group-hover:scale-105"
                                                 />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition">
                                                     <span className="text-[10px] font-bold text-white uppercase tracking-wider">Inspect</span>
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-100">
-                                                <svg className="h-7 w-7 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800">
+                                                <svg className="h-7 w-7 text-gray-400 dark:text-slate-500" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                                                 </svg>
                                             </div>
@@ -1104,7 +1104,7 @@ export default function RidesShow({
 
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="font-bold text-gray-900 text-base">
+                                                <p className="font-bold text-gray-900 dark:text-white text-base">
                                                     {ride.vehicle.make} {ride.vehicle.model}
                                                     {ride.vehicle.manufacture_year ? ` (${ride.vehicle.manufacture_year})` : ''}
                                                 </p>
@@ -1114,10 +1114,10 @@ export default function RidesShow({
                                                     {ride.vehicle.license_plate}
                                                 </span>
                                                 {ride.vehicle.color && (
-                                                    <span className="text-xs text-gray-500">Color: {ride.vehicle.color}</span>
+                                                    <span className="text-xs text-gray-500 dark:text-slate-400">Color: {ride.vehicle.color}</span>
                                                 )}
-                                                <span className="text-xs text-gray-400">·</span>
-                                                <span className="text-xs text-gray-600 font-medium">{ride.vehicle.seat_capacity} passenger seats</span>
+                                                <span className="text-xs text-gray-400 dark:text-slate-600">·</span>
+                                                <span className="text-xs text-gray-600 dark:text-slate-300 font-medium">{ride.vehicle.seat_capacity} passenger seats</span>
                                             </div>
                                         </div>
                                     </div>
@@ -1126,9 +1126,9 @@ export default function RidesShow({
                                         <button
                                             type="button"
                                             onClick={() => setVehicleLightboxOpen(true)}
-                                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition self-start sm:self-center shrink-0"
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700 transition self-start sm:self-center shrink-0"
                                         >
-                                            <svg className="h-3.5 w-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                            <svg className="h-3.5 w-3.5 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                                             </svg>
                                             <span>View Car Photo</span>
@@ -1139,15 +1139,15 @@ export default function RidesShow({
 
                             {/* Digital Payment / KPay QR Section */}
                             {ride.driver.payment_qr_path && (
-                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
+                                <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 p-5 shadow-sm">
                                     <div className="flex items-center justify-between gap-4">
                                         <div className="flex items-center gap-3">
                                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-xs">
                                                 PAY
                                             </div>
                                             <div>
-                                                <h4 className="text-sm font-bold text-gray-900">KPay / WavePay QR Code Available</h4>
-                                                <p className="text-xs text-gray-600">Scan to pay fare directly without carrying cash.</p>
+                                                <h4 className="text-sm font-bold text-gray-900 dark:text-white">KPay / WavePay QR Code Available</h4>
+                                                <p className="text-xs text-gray-600 dark:text-slate-300">Scan to pay fare directly without carrying cash.</p>
                                             </div>
                                         </div>
                                         <button
@@ -1162,8 +1162,8 @@ export default function RidesShow({
                             )}
 
                             {/* Route timeline */}
-                            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                            <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
+                                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
                                     Route Stops & Schedule
                                 </h3>
                                 <StopTimeline stops={ride.stops} />
@@ -1171,11 +1171,11 @@ export default function RidesShow({
 
                             {/* Notes */}
                             {ride.notes && (
-                                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                                <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
+                                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
                                         Driver Notes
                                     </h3>
-                                    <p className="text-sm text-gray-700 whitespace-pre-line">{ride.notes}</p>
+                                    <p className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-line">{ride.notes}</p>
                                 </div>
                             )}
                         </div>
@@ -1184,53 +1184,53 @@ export default function RidesShow({
                         <div className="space-y-4">
 
                             {/* Price & seats */}
-                            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                            <div className="rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
                                 <div className="mb-3 flex items-baseline justify-between">
-                                    <span className="text-3xl font-bold text-indigo-600">
+                                    <span className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
                                         {Number(ride.price_per_seat) === 0
                                             ? 'Free'
                                             : `$${Number(ride.price_per_seat).toFixed(2)}`}
                                     </span>
                                     {Number(ride.price_per_seat) > 0 && (
-                                        <span className="text-sm text-gray-400">/ seat</span>
+                                        <span className="text-sm text-gray-400 dark:text-slate-500">/ seat</span>
                                     )}
                                 </div>
 
-                                <p className="mb-1 text-sm text-gray-600">
-                                    <span className="font-medium">{ride.available_seats}</span> of{' '}
-                                    <span className="font-medium">{ride.total_seats}</span> seats available
+                                <p className="mb-1 text-sm text-gray-600 dark:text-[#A1A1AA]">
+                                    <span className="font-medium text-gray-900 dark:text-white">{ride.available_seats}</span> of{' '}
+                                    <span className="font-medium text-gray-900 dark:text-white">{ride.total_seats}</span> seats available
                                 </p>
 
                                 {/* Seat fill bar */}
-                                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100">
+                                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-slate-800">
                                     <div
                                         className="h-full rounded-full bg-indigo-500 transition-all"
                                         style={{ width: `${seatsPercent}%` }}
                                     />
                                 </div>
 
-                                <p className="mt-3 text-xs text-gray-400">
+                                <p className="mt-3 text-xs text-gray-400 dark:text-slate-500">
                                     🕐 {formatDateTime(ride.departure_time)}
                                 </p>
 
                                 {isOwnerDriver ? (
-                                    <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+                                    <div className="mt-4 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/60 dark:bg-indigo-950/30 p-4">
                                         <div className="flex items-center gap-2">
                                             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold">
                                                 ✓
                                             </span>
-                                            <span className="text-xs font-bold text-indigo-900">
+                                            <span className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
                                                 You are the Driver
                                             </span>
                                         </div>
-                                        <p className="mt-2 text-xs text-indigo-700">
+                                        <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-300">
                                             {pendingRequestsCount > 0
                                                 ? `You have ${pendingRequestsCount} pending booking request${pendingRequestsCount !== 1 ? 's' : ''} to review.`
                                                 : 'Manage your passenger requests in the panel on the left.'}
                                         </p>
                                     </div>
                                 ) : hasActiveBooking ? (
-                                    <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50/70 p-4 shadow-sm">
+                                    <div className="mt-4 rounded-xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/70 dark:bg-indigo-950/30 p-4 shadow-sm">
                                         <div className="flex items-center gap-2">
                                             <span
                                                 className={`flex h-6 w-6 items-center justify-center rounded-full text-white text-xs font-bold ${
@@ -1241,13 +1241,13 @@ export default function RidesShow({
                                             >
                                                 {existingBooking!.status === 'accepted' ? '✓' : '⏳'}
                                             </span>
-                                            <span className="text-xs font-bold text-gray-900">
+                                            <span className="text-xs font-bold text-gray-900 dark:text-white">
                                                 {existingBooking!.status === 'accepted'
                                                     ? 'Booking Confirmed'
                                                     : 'Your booking is currently Pending'}
                                             </span>
                                         </div>
-                                        <p className="mt-2 text-xs text-gray-600 leading-relaxed">
+                                        <p className="mt-2 text-xs text-gray-600 dark:text-slate-300 leading-relaxed">
                                             {existingBooking!.status === 'accepted'
                                                 ? `Your seat reservation (${existingBooking!.seats_booked} seat${existingBooking!.seats_booked !== 1 ? 's' : ''}) is confirmed.`
                                                 : `You have submitted a request for ${existingBooking!.seats_booked} seat${existingBooking!.seats_booked !== 1 ? 's' : ''}. Awaiting driver review.`}
@@ -1255,12 +1255,12 @@ export default function RidesShow({
                                         <div className="mt-3 flex items-center gap-2 flex-wrap">
                                             <Link
                                                 href={route('bookings.index')}
-                                                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                                                className="rounded-lg bg-indigo-600 dark:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 dark:hover:bg-indigo-600 transition"
                                             >
                                                 View in My Trips
                                             </Link>
                                             {ride.status === 'in_progress' ? (
-                                                <span className="text-[11px] text-gray-500 italic">
+                                                <span className="text-[11px] text-gray-500 dark:text-slate-400 italic">
                                                     Trip in progress (cancellation locked)
                                                 </span>
                                             ) : (
@@ -1269,7 +1269,7 @@ export default function RidesShow({
                                                         setCancelModalMode('passenger');
                                                         setCancelModalOpen(true);
                                                     }}
-                                                    className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
+                                                    className="rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition"
                                                 >
                                                     Cancel Booking
                                                 </button>
@@ -1277,21 +1277,21 @@ export default function RidesShow({
                                         </div>
                                     </div>
                                 ) : isCompletedBooking ? (
-                                    <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/70 p-4 shadow-sm">
+                                    <div className="mt-4 rounded-xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/70 dark:bg-blue-950/30 p-4 shadow-sm">
                                         <div className="flex items-center gap-2">
                                             <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">
                                                 ✓
                                             </span>
-                                            <span className="text-xs font-bold text-blue-900">
+                                            <span className="text-xs font-bold text-blue-900 dark:text-blue-200">
                                                 Trip Completed
                                             </span>
                                         </div>
-                                        <p className="mt-2 text-xs text-blue-700">
+                                        <p className="mt-2 text-xs text-blue-700 dark:text-blue-300">
                                             Hope you had a pleasant ride!
                                         </p>
                                         <div className="mt-3">
                                             {passengerReviewForDriver ? (
-                                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+                                                <span className="inline-flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950/50 px-3 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-300 ring-1 ring-amber-200 dark:ring-amber-800">
                                                     ★ {passengerReviewForDriver.rating} You reviewed this driver
                                                 </span>
                                             ) : (
@@ -1315,8 +1315,8 @@ export default function RidesShow({
                                         className={[
                                             'mt-4 w-full rounded-xl px-4 py-3 text-sm font-semibold shadow-sm transition',
                                             ride.available_seats === 0 || ride.status !== 'scheduled'
-                                                ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                                                : 'bg-indigo-600 text-white hover:bg-indigo-700',
+                                                ? 'cursor-not-allowed bg-gray-200 dark:bg-slate-800 text-gray-400 dark:text-slate-500'
+                                                : 'bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600',
                                         ].join(' ')}
                                         disabled={ride.available_seats === 0 || ride.status !== 'scheduled'}
                                     >
@@ -1337,8 +1337,8 @@ export default function RidesShow({
 
                             {/* Booking form (collapsible, passenger only, hidden if already booked) */}
                             {!isOwnerDriver && !hasActiveBooking && !isCompletedBooking && showBooking && (
-                                <div className="rounded-2xl border border-indigo-200 bg-white p-5 shadow-sm">
-                                    <h3 className="mb-4 text-sm font-semibold text-gray-700">
+                                <div className="rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-white dark:bg-[#1C1C22] p-5 shadow-sm">
+                                    <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-slate-200">
                                         Booking Details
                                     </h3>
                                     <BookingForm ride={ride} existingBooking={existingBooking} />
@@ -1386,40 +1386,40 @@ export default function RidesShow({
                     onClick={() => setVehicleLightboxOpen(false)}
                 >
                     <div
-                        className="relative max-w-3xl w-full overflow-hidden rounded-2xl bg-white shadow-2xl"
+                        className="relative max-w-3xl w-full overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C22] border border-gray-100 dark:border-slate-800 shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 px-6 py-4">
                             <div>
-                                <h3 className="text-base font-bold text-gray-900">
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                                     {ride.vehicle.make} {ride.vehicle.model}
                                 </h3>
-                                <p className="text-xs text-gray-500 font-mono">
+                                <p className="text-xs text-gray-500 dark:text-[#A1A1AA] font-mono">
                                     Plate: {ride.vehicle.license_plate} · Capacity: {ride.vehicle.seat_capacity} seats
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setVehicleLightboxOpen(false)}
-                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 transition"
                             >
                                 <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
-                        <div className="bg-gray-900 p-2 flex items-center justify-center max-h-[75vh]">
+                        <div className="bg-gray-950 p-2 flex items-center justify-center max-h-[75vh]">
                             <img
                                 src={`/storage/${ride.vehicle.vehicle_photo_path}`}
                                 alt={`${ride.vehicle.make} ${ride.vehicle.model}`}
                                 className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg"
                             />
                         </div>
-                        <div className="px-6 py-3 bg-gray-50 text-right">
+                        <div className="px-6 py-3 bg-gray-50 dark:bg-slate-900/60 border-t border-gray-100 dark:border-slate-800 text-right">
                             <button
                                 type="button"
                                 onClick={() => setVehicleLightboxOpen(false)}
-                                className="rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800 transition"
+                                className="rounded-xl bg-gray-900 dark:bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800 dark:hover:bg-slate-700 transition"
                             >
                                 Close Inspection
                             </button>
@@ -1435,22 +1435,22 @@ export default function RidesShow({
                     onClick={() => setPaymentQrModalOpen(false)}
                 >
                     <div
-                        className="relative max-w-md w-full overflow-hidden rounded-2xl bg-white shadow-2xl p-6 text-center space-y-4"
+                        className="relative max-w-md w-full overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C22] border border-gray-100 dark:border-slate-800 shadow-2xl p-6 text-center space-y-4"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-left">
+                        <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3 text-left">
                             <div>
-                                <h3 className="text-base font-bold text-gray-900">
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white">
                                     Driver Payment QR
                                 </h3>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">
                                     {ride.driver.name} · {ride.driver.phone || 'Cashless payment'}
                                 </p>
                             </div>
                             <button
                                 type="button"
                                 onClick={() => setPaymentQrModalOpen(false)}
-                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-slate-200 transition"
                             >
                                 <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -1458,7 +1458,7 @@ export default function RidesShow({
                             </button>
                         </div>
 
-                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 inline-block mx-auto">
+                        <div className="bg-gray-50 dark:bg-slate-900/50 p-4 rounded-xl border border-gray-200 dark:border-slate-800 inline-block mx-auto">
                             <img
                                 src={`/storage/${ride.driver.payment_qr_path}`}
                                 alt="Driver Payment QR"
@@ -1466,7 +1466,7 @@ export default function RidesShow({
                             />
                         </div>
 
-                        <p className="text-xs text-gray-500 leading-relaxed">
+                        <p className="text-xs text-gray-500 dark:text-[#A1A1AA] leading-relaxed">
                             Open KBZPay or WavePay app, scan this QR code, and transfer the agreed ride fare (${ride.price_per_seat} / seat).
                         </p>
 

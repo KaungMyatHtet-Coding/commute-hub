@@ -145,15 +145,15 @@ export default function Index({ auth, users, filters, counts }: Props) {
                     {/* Header bar */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Platform User Management</h1>
-                            <p className="text-sm text-gray-500 mt-0.5">
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Platform User Management</h1>
+                            <p className="text-sm text-gray-500 dark:text-[#A1A1AA] mt-0.5">
                                 Inspect user credentials, oversee KYC verification, enforce safety compliance, and manage account suspensions.
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
                             <Link
                                 href={route('admin.dashboard')}
-                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
                             >
                                 ← Admin Dashboard
                             </Link>
@@ -161,8 +161,8 @@ export default function Index({ auth, users, filters, counts }: Props) {
                     </div>
 
                     {/* Filter Tabs & Search Bar */}
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 space-y-4">
-                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 pb-4">
+                    <div className="bg-white dark:bg-[#1C1C22] rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 space-y-4">
+                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 dark:border-slate-800 pb-4">
                             {/* Filter Tabs */}
                             <div className="flex flex-wrap gap-2">
                                 {tabs.map((tab) => {
@@ -174,13 +174,13 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                             className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
                                                 active
                                                     ? 'bg-indigo-600 text-white shadow-sm'
-                                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                    : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700'
                                             }`}
                                         >
                                             {tab.label}
                                             <span
                                                 className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                                                    active ? 'bg-indigo-700 text-white' : 'bg-gray-200 text-gray-700'
+                                                    active ? 'bg-indigo-700 text-white' : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
                                                 }`}
                                             >
                                                 {tab.count}
@@ -198,10 +198,10 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                         placeholder="Search name, email, phone, NRC..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full text-xs rounded-xl border-gray-200 pl-8 pr-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
+                                        className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white pl-8 pr-3 py-2 focus:border-indigo-500 focus:ring-indigo-500"
                                     />
                                     <svg
-                                        className="w-4 h-4 absolute left-2.5 top-2.5 text-gray-400"
+                                        className="w-4 h-4 absolute left-2.5 top-2.5 text-gray-400 dark:text-slate-500"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -231,7 +231,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 { preserveState: true }
                                             );
                                         }}
-                                        className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-xs font-medium transition"
+                                        className="px-3 py-2 bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-xl text-xs font-medium transition"
                                     >
                                         Clear
                                     </button>
@@ -241,9 +241,9 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                         {/* Users Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs text-gray-600">
+                            <table className="w-full text-left text-xs text-gray-600 dark:text-slate-300">
                                 <thead>
-                                    <tr className="border-b border-gray-100 text-gray-400 uppercase tracking-wider text-[10px]">
+                                    <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 dark:text-slate-400 uppercase tracking-wider text-[10px]">
                                         <th className="py-3 px-3">User</th>
                                         <th className="py-3 px-3">Roles</th>
                                         <th className="py-3 px-3">KYC & Verification</th>
@@ -253,34 +253,34 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                         <th className="py-3 px-3 text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
+                                <tbody className="divide-y divide-gray-50 dark:divide-slate-800/60">
                                     {users.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="py-8 text-center text-gray-400">
+                                            <td colSpan={7} className="py-8 text-center text-gray-400 dark:text-slate-500">
                                                 No users found matching current filters.
                                             </td>
                                         </tr>
                                     ) : (
                                         users.data.map((user) => (
-                                            <tr key={user.id} className="hover:bg-gray-50/60 transition">
+                                            <tr key={user.id} className="hover:bg-gray-50/60 dark:hover:bg-slate-800/40 transition">
                                                 <td className="py-3.5 px-3">
                                                     <div className="flex items-center gap-3">
                                                         {user.passport_photo_path ? (
                                                             <img
                                                                 src={`/storage/${user.passport_photo_path}`}
                                                                 alt={user.name}
-                                                                className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-100"
+                                                                className="w-9 h-9 rounded-full object-cover ring-2 ring-gray-100 dark:ring-slate-700"
                                                             />
                                                         ) : (
-                                                            <div className="w-9 h-9 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs ring-2 ring-gray-100">
+                                                            <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 flex items-center justify-center font-bold text-xs ring-2 ring-gray-100 dark:ring-slate-700">
                                                                 {user.name.charAt(0).toUpperCase()}
                                                             </div>
                                                         )}
                                                         <div>
-                                                            <div className="font-semibold text-gray-900">{user.name}</div>
-                                                            <div className="text-gray-400 text-[11px]">{user.email}</div>
+                                                            <div className="font-semibold text-gray-900 dark:text-white">{user.name}</div>
+                                                            <div className="text-gray-400 dark:text-slate-400 text-[11px]">{user.email}</div>
                                                             {user.phone && (
-                                                                <div className="text-gray-500 text-[10px] font-mono">{user.phone}</div>
+                                                                <div className="text-gray-500 dark:text-slate-500 text-[10px] font-mono">{user.phone}</div>
                                                             )}
                                                         </div>
                                                     </div>
@@ -294,10 +294,10 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                                 key={r}
                                                                 className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                                                     r === 'admin'
-                                                                        ? 'bg-purple-100 text-purple-700'
+                                                                        ? 'bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300'
                                                                         : r === 'driver'
-                                                                        ? 'bg-blue-100 text-blue-700'
-                                                                        : 'bg-emerald-100 text-emerald-700'
+                                                                        ? 'bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300'
+                                                                        : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
                                                                 }`}
                                                             >
                                                                 {r}
@@ -310,32 +310,32 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 <td className="py-3.5 px-3">
                                                     <div className="space-y-1">
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="text-[10px] text-gray-400">KYC:</span>
+                                                            <span className="text-[10px] text-gray-400 dark:text-slate-500">KYC:</span>
                                                             <span
                                                                 className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
                                                                     user.kyc_status === 'verified'
-                                                                        ? 'bg-emerald-50 text-emerald-700'
+                                                                        ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
                                                                         : user.kyc_status === 'pending'
-                                                                        ? 'bg-amber-50 text-amber-700'
+                                                                        ? 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
                                                                         : user.kyc_status === 'rejected'
-                                                                        ? 'bg-red-50 text-red-700'
-                                                                        : 'bg-gray-100 text-gray-600'
+                                                                        ? 'bg-red-50 dark:bg-red-950/70 text-red-700 dark:text-red-300'
+                                                                        : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
                                                                 }`}
                                                             >
                                                                 {user.kyc_status.toUpperCase()}
                                                             </span>
                                                         </div>
                                                         {user.driver_verification_status && (
-                                                            <div className="flex items-center gap-1.5">
-                                                                <span className="text-[10px] text-gray-400">Driver:</span>
+                                                             <div className="flex items-center gap-1.5">
+                                                                <span className="text-[10px] text-gray-400 dark:text-slate-500">Driver:</span>
                                                                 <span
                                                                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-md ${
                                                                         user.driver_verification_status === 'verified'
-                                                                            ? 'bg-emerald-50 text-emerald-700'
+                                                                            ? 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
                                                                             : user.driver_verification_status === 'pending' ||
                                                                               user.driver_verification_status === 'pending_verification'
-                                                                            ? 'bg-amber-50 text-amber-700'
-                                                                            : 'bg-gray-100 text-gray-600'
+                                                                            ? 'bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
+                                                                            : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
                                                                     }`}
                                                                 >
                                                                     {user.driver_verification_status.toUpperCase()}
@@ -347,14 +347,14 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                                                 {/* Activity */}
                                                 <td className="py-3.5 px-3">
-                                                    <div className="text-[11px] text-gray-700">
+                                                    <div className="text-[11px] text-gray-700 dark:text-slate-300">
                                                         <div>
-                                                            <span className="font-semibold text-gray-900">{user.rides_offered_count}</span>{' '}
-                                                            <span className="text-gray-400">rides driven</span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">{user.rides_offered_count}</span>{' '}
+                                                            <span className="text-gray-400 dark:text-slate-500">rides driven</span>
                                                         </div>
                                                         <div>
-                                                            <span className="font-semibold text-gray-900">{user.bookings_made_count}</span>{' '}
-                                                            <span className="text-gray-400">bookings</span>
+                                                            <span className="font-semibold text-gray-900 dark:text-white">{user.bookings_made_count}</span>{' '}
+                                                            <span className="text-gray-400 dark:text-slate-500">bookings</span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -363,19 +363,19 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 <td className="py-3.5 px-3">
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-amber-500 font-bold">★ {user.average_rating}</span>
-                                                        <span className="text-gray-400 text-[10px]">({user.review_count})</span>
+                                                        <span className="text-gray-400 dark:text-slate-500 text-[10px]">({user.review_count})</span>
                                                     </div>
                                                 </td>
 
                                                 {/* Status (Blocked or Active) */}
                                                 <td className="py-3.5 px-3">
                                                     {user.is_blocked ? (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                                                             Blocked
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                                             Active
                                                         </span>
@@ -387,7 +387,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                     <div className="inline-flex items-center gap-2">
                                                         <button
                                                             onClick={() => setSelectedUser(user)}
-                                                            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-200 dark:hover:bg-slate-700 transition"
                                                         >
                                                             Inspect Profile
                                                         </button>
@@ -396,7 +396,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                             user.is_blocked ? (
                                                                 <button
                                                                     onClick={() => setUnblockingUser(user)}
-                                                                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition"
+                                                                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition"
                                                                 >
                                                                     Unblock
                                                                 </button>
@@ -407,7 +407,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                                         setBlockReason('');
                                                                         setBlockError('');
                                                                     }}
-                                                                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-red-50 text-red-700 hover:bg-red-100 transition"
+                                                                    className="px-3 py-1.5 text-xs font-semibold rounded-xl bg-red-50 dark:bg-red-950/70 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/60 transition"
                                                                 >
                                                                     Block User
                                                                 </button>
@@ -424,8 +424,8 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                         {/* Pagination */}
                         {users.last_page > 1 && (
-                            <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-xs">
-                                <span className="text-gray-500">
+                            <div className="flex items-center justify-between border-t border-gray-100 dark:border-slate-800 pt-4 text-xs">
+                                <span className="text-gray-500 dark:text-slate-400">
                                     Showing page {users.current_page} of {users.last_page} ({users.total} total)
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -438,8 +438,8 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 link.active
                                                     ? 'bg-indigo-600 text-white font-bold'
                                                     : link.url
-                                                    ? 'bg-gray-50 text-gray-700 hover:bg-gray-100'
-                                                    : 'text-gray-300 cursor-not-allowed'
+                                                    ? 'bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700'
+                                                    : 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
                                             }`}
                                             dangerouslySetInnerHTML={{ __html: link.label }}
                                         />
@@ -454,29 +454,29 @@ export default function Index({ auth, users, filters, counts }: Props) {
             {/* Profile & KYC Inspector Modal */}
             {selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm animate-fade-in overflow-y-auto">
-                    <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-100 my-8">
+                    <div className="w-full max-w-3xl overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-2xl ring-1 ring-gray-100 dark:ring-slate-800 my-8">
                         {/* Modal Header */}
-                        <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between bg-gray-50/50">
+                        <div className="border-b border-gray-100 dark:border-slate-800 px-6 py-4 flex items-center justify-between bg-gray-50/50 dark:bg-slate-900/50">
                             <div className="flex items-center gap-3">
                                 {selectedUser.passport_photo_path ? (
                                     <img
                                         src={`/storage/${selectedUser.passport_photo_path}`}
                                         alt={selectedUser.name}
-                                        className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-200"
+                                        className="w-12 h-12 rounded-full object-cover ring-2 ring-indigo-200 dark:ring-indigo-500/30"
                                     />
                                 ) : (
-                                    <div className="w-12 h-12 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-lg">
+                                    <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 flex items-center justify-center font-bold text-lg">
                                         {selectedUser.name.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                                 <div>
-                                    <h3 className="text-base font-bold text-gray-900">{selectedUser.name}</h3>
-                                    <p className="text-xs text-gray-500">User ID #{selectedUser.id} • Joined {new Date(selectedUser.created_at).toLocaleDateString()}</p>
+                                    <h3 className="text-base font-bold text-gray-900 dark:text-white">{selectedUser.name}</h3>
+                                    <p className="text-xs text-gray-500 dark:text-[#A1A1AA]">User ID #{selectedUser.id} • Joined {new Date(selectedUser.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
                             <button
                                 onClick={() => setSelectedUser(null)}
-                                className="text-gray-400 hover:text-gray-600 p-2 rounded-xl hover:bg-gray-100 transition"
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-slate-800 transition"
                             >
                                 ✕
                             </button>
@@ -486,7 +486,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
                             {/* Block warning banner if blocked */}
                             {selectedUser.is_blocked && (
-                                <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-800">
+                                <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-xs text-red-800 dark:text-red-300">
                                     <div className="font-bold mb-1">Account Suspended / Blocked</div>
                                     <div>Reason: {selectedUser.blocked_reason || 'No specific reason provided.'}</div>
                                 </div>
@@ -494,48 +494,48 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                             {/* Essential Details Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2 text-xs">
-                                    <div className="font-bold text-gray-700 text-xs uppercase tracking-wider">Contact & Profile</div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Email:</span> <span className="font-medium text-gray-900">{selectedUser.email}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Phone:</span> <span className="font-medium text-gray-900 font-mono">{selectedUser.phone || 'N/A'}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Gender:</span> <span className="font-medium text-gray-900 capitalize">{selectedUser.gender || 'N/A'}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Roles:</span> <span className="font-medium text-gray-900 capitalize">{selectedUser.roles.join(', ')}</span></div>
+                                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/70 border border-gray-100 dark:border-slate-800 space-y-2 text-xs">
+                                    <div className="font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Contact & Profile</div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Email:</span> <span className="font-medium text-gray-900 dark:text-white">{selectedUser.email}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Phone:</span> <span className="font-medium text-gray-900 dark:text-white font-mono">{selectedUser.phone || 'N/A'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Gender:</span> <span className="font-medium text-gray-900 dark:text-white capitalize">{selectedUser.gender || 'N/A'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Roles:</span> <span className="font-medium text-gray-900 dark:text-white capitalize">{selectedUser.roles.join(', ')}</span></div>
                                 </div>
 
-                                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100 space-y-2 text-xs">
-                                    <div className="font-bold text-gray-700 text-xs uppercase tracking-wider">Emergency Contact & Safety</div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Contact Name:</span> <span className="font-medium text-gray-900">{selectedUser.emergency_contact_name || 'Not set'}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Contact Phone:</span> <span className="font-medium text-gray-900 font-mono">{selectedUser.emergency_contact_phone || 'Not set'}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Average Rating:</span> <span className="font-bold text-amber-600">★ {selectedUser.average_rating} ({selectedUser.review_count} reviews)</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">Activity Stats:</span> <span className="font-medium text-gray-900">{selectedUser.rides_offered_count} driven / {selectedUser.bookings_made_count} booked</span></div>
+                                <div className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/70 border border-gray-100 dark:border-slate-800 space-y-2 text-xs">
+                                    <div className="font-bold text-gray-700 dark:text-slate-300 text-xs uppercase tracking-wider">Emergency Contact & Safety</div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Contact Name:</span> <span className="font-medium text-gray-900 dark:text-white">{selectedUser.emergency_contact_name || 'Not set'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Contact Phone:</span> <span className="font-medium text-gray-900 dark:text-white font-mono">{selectedUser.emergency_contact_phone || 'Not set'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Average Rating:</span> <span className="font-bold text-amber-600 dark:text-amber-400">★ {selectedUser.average_rating} ({selectedUser.review_count} reviews)</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400 dark:text-slate-500">Activity Stats:</span> <span className="font-medium text-gray-900 dark:text-white">{selectedUser.rides_offered_count} driven / {selectedUser.bookings_made_count} booked</span></div>
                                 </div>
                             </div>
 
                             {/* KYC Documents Section */}
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">National Identity (NRC) & KYC</h4>
+                                    <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">National Identity (NRC) & KYC</h4>
                                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                        selectedUser.kyc_status === 'verified' ? 'bg-emerald-100 text-emerald-700' :
-                                        selectedUser.kyc_status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                                        'bg-gray-100 text-gray-600'
+                                        selectedUser.kyc_status === 'verified' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' :
+                                        selectedUser.kyc_status === 'pending' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' :
+                                        'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
                                     }`}>
                                         Status: {selectedUser.kyc_status.toUpperCase()}
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 text-xs">
-                                    <span className="text-gray-400">NRC Number:</span>{' '}
-                                    <span className="font-mono font-bold text-gray-900">{selectedUser.nrc_number || 'Not provided'}</span>
+                                <div className="p-3 bg-gray-50 dark:bg-slate-900/70 rounded-2xl border border-gray-100 dark:border-slate-800 text-xs">
+                                    <span className="text-gray-400 dark:text-slate-500">NRC Number:</span>{' '}
+                                    <span className="font-mono font-bold text-gray-900 dark:text-white">{selectedUser.nrc_number || 'Not provided'}</span>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <div className="text-[11px] font-semibold text-gray-500 mb-1">NRC Front Document</div>
+                                        <div className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NRC Front Document</div>
                                         {selectedUser.nrc_front_path ? (
                                             <div
                                                 onClick={() => setInspectPhoto({ src: `/storage/${selectedUser.nrc_front_path}`, title: 'NRC Front Photo' })}
-                                                className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 h-40 flex items-center justify-center"
+                                                className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 h-40 flex items-center justify-center"
                                             >
                                                 <img
                                                     src={`/storage/${selectedUser.nrc_front_path}`}
@@ -547,18 +547,18 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="h-40 rounded-2xl border border-dashed border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 text-xs">
+                                            <div className="h-40 rounded-2xl border border-dashed border-gray-200 dark:border-slate-750 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center text-gray-400 dark:text-slate-500 text-xs">
                                                 No NRC Front Uploaded
                                             </div>
                                         )}
                                     </div>
 
                                     <div>
-                                        <div className="text-[11px] font-semibold text-gray-500 mb-1">NRC Back Document</div>
+                                        <div className="text-[11px] font-semibold text-gray-500 dark:text-slate-400 mb-1">NRC Back Document</div>
                                         {selectedUser.nrc_back_path ? (
                                             <div
                                                 onClick={() => setInspectPhoto({ src: `/storage/${selectedUser.nrc_back_path}`, title: 'NRC Back Photo' })}
-                                                className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 h-40 flex items-center justify-center"
+                                                className="cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 h-40 flex items-center justify-center"
                                             >
                                                 <img
                                                     src={`/storage/${selectedUser.nrc_back_path}`}
@@ -570,7 +570,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="h-40 rounded-2xl border border-dashed border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 text-xs">
+                                            <div className="h-40 rounded-2xl border border-dashed border-gray-200 dark:border-slate-750 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center text-gray-400 dark:text-slate-500 text-xs">
                                                 No NRC Back Uploaded
                                             </div>
                                         )}
@@ -580,28 +580,28 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                             {/* Driver License & Vehicles (if applicable) */}
                             {(selectedUser.driver_license_number || selectedUser.vehicles.length > 0) && (
-                                <div className="space-y-3 border-t border-gray-100 pt-4">
+                                <div className="space-y-3 border-t border-gray-100 dark:border-slate-800 pt-4">
                                     <div className="flex items-center justify-between">
-                                        <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Credentials & Vehicles</h4>
+                                        <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Driver Credentials & Vehicles</h4>
                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                            selectedUser.driver_verification_status === 'verified' ? 'bg-emerald-100 text-emerald-700' :
-                                            selectedUser.driver_verification_status === 'pending' || selectedUser.driver_verification_status === 'pending_verification' ? 'bg-amber-100 text-amber-700' :
-                                            'bg-gray-100 text-gray-600'
+                                            selectedUser.driver_verification_status === 'verified' ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400' :
+                                            selectedUser.driver_verification_status === 'pending' || selectedUser.driver_verification_status === 'pending_verification' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400' :
+                                            'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400'
                                         }`}>
                                             Status: {(selectedUser.driver_verification_status || 'N/A').toUpperCase()}
                                         </span>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 text-xs space-y-1">
+                                        <div className="p-3 bg-gray-50 dark:bg-slate-900/70 rounded-2xl border border-gray-100 dark:border-slate-800 text-xs space-y-1">
                                             <div>
-                                                <span className="text-gray-400">License Number:</span>{' '}
-                                                <span className="font-mono font-bold text-gray-900">{selectedUser.driver_license_number || 'N/A'}</span>
+                                                <span className="text-gray-400 dark:text-slate-500">License Number:</span>{' '}
+                                                <span className="font-mono font-bold text-gray-900 dark:text-white">{selectedUser.driver_license_number || 'N/A'}</span>
                                             </div>
                                             {selectedUser.driver_license_photo_path && (
                                                 <div
                                                     onClick={() => setInspectPhoto({ src: `/storage/${selectedUser.driver_license_photo_path}`, title: 'Driver License' })}
-                                                    className="mt-2 cursor-pointer group relative overflow-hidden rounded-xl border border-gray-200 bg-gray-100 h-28 flex items-center justify-center"
+                                                    className="mt-2 cursor-pointer group relative overflow-hidden rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 h-28 flex items-center justify-center"
                                                 >
                                                     <img
                                                         src={`/storage/${selectedUser.driver_license_photo_path}`}
@@ -615,20 +615,20 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                             )}
                                         </div>
 
-                                        <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100 text-xs">
-                                            <div className="font-semibold text-gray-700 mb-2">Registered Vehicles ({selectedUser.vehicles.length})</div>
+                                        <div className="p-3 bg-gray-50 dark:bg-slate-900/70 rounded-2xl border border-gray-100 dark:border-slate-800 text-xs">
+                                            <div className="font-semibold text-gray-700 dark:text-slate-300 mb-2">Registered Vehicles ({selectedUser.vehicles.length})</div>
                                             {selectedUser.vehicles.length === 0 ? (
-                                                <div className="text-gray-400">No vehicles registered.</div>
+                                                <div className="text-gray-400 dark:text-slate-500">No vehicles registered.</div>
                                             ) : (
                                                 <div className="space-y-2">
                                                     {selectedUser.vehicles.map((v) => (
-                                                        <div key={v.id} className="p-2 bg-white rounded-xl border border-gray-200/60 flex items-center justify-between">
+                                                        <div key={v.id} className="p-2 bg-white dark:bg-slate-800 rounded-xl border border-gray-200/60 dark:border-slate-700 flex items-center justify-between">
                                                             <div>
-                                                                <div className="font-bold text-gray-900">{v.make} {v.model} ({v.color || 'Standard'})</div>
-                                                                <div className="text-[10px] font-mono text-gray-500">{v.license_plate}</div>
+                                                                <div className="font-bold text-gray-900 dark:text-white">{v.make} {v.model} ({v.color || 'Standard'})</div>
+                                                                <div className="text-[10px] font-mono text-gray-500 dark:text-slate-400">{v.license_plate}</div>
                                                             </div>
                                                             <div className="text-right">
-                                                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                                                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400">
                                                                     {v.seat_capacity} seats
                                                                 </span>
                                                             </div>
@@ -643,11 +643,11 @@ export default function Index({ auth, users, filters, counts }: Props) {
 
                             {/* Payment QR if uploaded */}
                             {selectedUser.payment_qr_path && (
-                                <div className="border-t border-gray-100 pt-4 space-y-2">
-                                    <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Payment QR (KPay / WavePay)</h4>
+                                <div className="border-t border-gray-100 dark:border-slate-800 pt-4 space-y-2">
+                                    <h4 className="text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Payment QR (KPay / WavePay)</h4>
                                     <div
                                         onClick={() => setInspectPhoto({ src: `/storage/${selectedUser.payment_qr_path}`, title: 'Payment QR' })}
-                                        className="w-32 h-32 cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 flex items-center justify-center"
+                                        className="w-32 h-32 cursor-pointer group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 flex items-center justify-center"
                                     >
                                         <img
                                             src={`/storage/${selectedUser.payment_qr_path}`}
@@ -663,7 +663,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="border-t border-gray-100 px-6 py-4 bg-gray-50 flex items-center justify-between">
+                        <div className="border-t border-gray-100 dark:border-slate-800 px-6 py-4 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-between">
                             <div>
                                 {selectedUser.id !== auth.user.id && (
                                     selectedUser.is_blocked ? (
@@ -698,7 +698,7 @@ export default function Index({ auth, users, filters, counts }: Props) {
                             <button
                                 type="button"
                                 onClick={() => setSelectedUser(null)}
-                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-200 transition"
+                                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-800 transition"
                             >
                                 Close Inspector
                             </button>
@@ -713,10 +713,10 @@ export default function Index({ auth, users, filters, counts }: Props) {
                     className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
                     onClick={() => setInspectPhoto(null)}
                 >
-                    <div className="relative max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-white p-2" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                            <span className="text-xs font-bold text-gray-800">{inspectPhoto.title}</span>
-                            <button onClick={() => setInspectPhoto(null)} className="text-gray-400 hover:text-gray-600 text-sm font-bold px-2 py-1">✕</button>
+                    <div className="relative max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C22] p-2 ring-1 ring-gray-100 dark:ring-slate-800" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-slate-800">
+                            <span className="text-xs font-bold text-gray-800 dark:text-white">{inspectPhoto.title}</span>
+                            <button onClick={() => setInspectPhoto(null)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm font-bold px-2 py-1">✕</button>
                         </div>
                         <img
                             src={inspectPhoto.src}
@@ -730,19 +730,19 @@ export default function Index({ auth, users, filters, counts }: Props) {
             {/* Block Modal */}
             {blockingUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm animate-fade-in">
-                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-gray-100">
-                        <div className="border-b border-gray-100 px-6 py-4 bg-red-50/60">
-                            <h3 className="text-base font-bold text-red-900">Suspend / Block User</h3>
-                            <p className="text-xs text-red-600 mt-0.5">
+                    <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white dark:bg-[#1C1C22] shadow-2xl ring-1 ring-gray-100 dark:ring-slate-800">
+                        <div className="border-b border-gray-100 dark:border-slate-800 px-6 py-4 bg-red-50/60 dark:bg-red-950/40">
+                            <h3 className="text-base font-bold text-red-900 dark:text-red-300">Suspend / Block User</h3>
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
                                 User: {blockingUser.name} ({blockingUser.email})
                             </p>
                         </div>
                         <div className="p-6 space-y-4">
-                            <p className="text-xs text-gray-600 leading-relaxed">
+                            <p className="text-xs text-gray-600 dark:text-[#A1A1AA] leading-relaxed">
                                 Blocking this user will immediately terminate their active session, cancel unfulfilled bookings, and prevent them from logging in.
                             </p>
                             <div>
-                                <label className="block text-xs font-bold text-gray-700 mb-1">
+                                <label className="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">
                                     Reason for Suspension <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
@@ -753,15 +753,15 @@ export default function Index({ auth, users, filters, counts }: Props) {
                                     }}
                                     placeholder="e.g. Repeated ride cancellations, abusive behavior, failed KYC spoof verification..."
                                     rows={3}
-                                    className="w-full text-xs rounded-xl border-gray-200 focus:border-red-500 focus:ring-red-500"
+                                    className="w-full text-xs rounded-xl border-gray-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white focus:border-red-500 focus:ring-red-500"
                                 />
-                                {blockError && <p className="text-xs text-red-600 mt-1">{blockError}</p>}
+                                {blockError && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{blockError}</p>}
                             </div>
                             <div className="flex items-center justify-end gap-3 pt-2">
                                 <button
                                     type="button"
                                     onClick={() => setBlockingUser(null)}
-                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-100 transition"
+                                    className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition"
                                 >
                                     Cancel
                                 </button>

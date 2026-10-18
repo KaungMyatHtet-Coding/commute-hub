@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ─── Dark Mode Base ────────────────────────────────────────────────────────── */
+@layer base {
+    html {
+        @apply overflow-x-hidden;
+    }
+
+    body {
+        @apply overflow-x-hidden transition-colors duration-200;
+    }
+
+    /* Dark mode body & root backgrounds */
+    .dark body {
+        background-color: #121212;
+        color: #F2F2F2;
+    }
+
+    /* Dark scrollbar (Webkit) */
+    .dark ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .dark ::-webkit-scrollbar-track {
+        background: #1C1C22;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+        background: #3f3f50;
+        border-radius: 3px;
+    }
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background: #5a5a70;
+    }
+}
+
+/* ─── Reusable dark-mode surface utilities ────────────────────────────────── */
+@layer utilities {
+    .dark-bg {
+        background-color: #121212;
+    }
+    .dark-surface {
+        background-color: #1C1C22;
+    }
+    .dark-border {
+        border-color: #2A2A35;
+    }
+    .dark-text {
+        color: #F2F2F2;
+    }
+    .dark-muted {
+        color: #A1A1AA;
+    }
+
+    /* Animate fade-in (used for modals & drawers) */
+    .animate-fade-in {
+        animation: fadeIn 0.18s ease-out;
+    }
+    .animate-slide-down {
+        animation: slideDown 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+}

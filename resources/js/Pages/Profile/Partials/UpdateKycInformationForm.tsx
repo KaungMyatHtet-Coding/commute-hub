@@ -81,13 +81,13 @@ export default function UpdateKycInformationForm({ className = '' }: { className
 
     return (
         <section className={className}>
-            <header className="border-b border-gray-100 pb-4">
+            <header className="border-b border-gray-100 dark:border-slate-800 pb-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-900">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                             Identity Verification (KYC) & Safety Profile
                         </h2>
-                        <p className="mt-1 text-sm text-gray-600">
+                        <p className="mt-1 text-sm text-gray-600 dark:text-[#A1A1AA]">
                             Mandatory identity verification required before posting or booking carpooling rides.
                         </p>
                     </div>
@@ -96,12 +96,12 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                         <span
                             className={`rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${
                                 isVerified
-                                    ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                                    ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 ring-emerald-200 dark:ring-emerald-900/50'
                                     : isPending
-                                    ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                                    ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 ring-amber-200 dark:ring-amber-900/50'
                                     : isRejected
-                                    ? 'bg-red-50 text-red-700 ring-red-200'
-                                    : 'bg-gray-100 text-gray-700 ring-gray-200'
+                                    ? 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 ring-red-200 dark:ring-red-900/50'
+                                    : 'bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 ring-gray-200 dark:ring-slate-700'
                             }`}
                         >
                             {isVerified
@@ -117,18 +117,18 @@ export default function UpdateKycInformationForm({ className = '' }: { className
 
                 {/* 2-per-month Limit & Pending Approval Banners */}
                 {isVerified && (
-                    <div className="mt-4 flex items-center justify-between rounded-2xl bg-indigo-50/70 p-3.5 text-xs text-indigo-900 ring-1 ring-indigo-100">
+                    <div className="mt-4 flex items-center justify-between rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 p-3.5 text-xs text-indigo-900 dark:text-indigo-200 ring-1 ring-indigo-100 dark:ring-indigo-900/50">
                         <span className="font-medium">
                             Profile Updates this month: <span className="font-bold">{updatesCount} / 2</span>
                         </span>
-                        <span className="text-indigo-600">
+                        <span className="text-indigo-600 dark:text-indigo-400">
                             Updates are limited to 2 times per month for security and fraud prevention.
                         </span>
                     </div>
                 )}
 
                 {hasPendingChanges && (
-                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                    <div className="mt-3 rounded-2xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/40 p-4 text-xs text-amber-900 dark:text-amber-300">
                         <div className="flex items-start gap-2">
                             <span className="font-bold">Pending Admin Review:</span>
                             <span>Your profile update request has been submitted and is awaiting Admin approval. Core verified details remain active until approved.</span>
@@ -137,7 +137,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                 )}
 
                 {isRejected && user.kyc_rejection_reason && (
-                    <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-xs text-red-900">
+                    <div className="mt-3 rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 p-4 text-xs text-red-900 dark:text-red-300">
                         <span className="font-bold">Rejection Reason:</span> {user.kyc_rejection_reason}
                     </div>
                 )}
@@ -188,7 +188,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                         <InputLabel htmlFor="gender" value="Gender" />
                         <select
                             id="gender"
-                            className="mt-1 block w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            className="mt-1 block w-full rounded-xl border-gray-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                             value={data.gender}
                             onChange={(e) => setData('gender', e.target.value)}
                             required
@@ -215,8 +215,8 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                 </div>
 
                 {/* Section 2: Emergency Contact */}
-                <div className="border-t border-gray-100 pt-5">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600">
+                <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                         Emergency Safety Contact
                     </h3>
                     <div className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -249,17 +249,17 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                 </div>
 
                 {/* Section 3: Anti-Spoofing Document & Photo Uploads */}
-                <div className="border-t border-gray-100 pt-5">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600">
+                <div className="border-t border-gray-100 dark:border-slate-800 pt-5">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
                         Identity Verification Documents & Photos
                     </h3>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-[#A1A1AA]">
                         Upload high-clarity photos. Accepted formats: JPG, JPEG, PNG, WEBP (max 2MB each).
                     </p>
 
                     <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                         {/* 1. Passport-style photo */}
-                        <div className="overflow-hidden rounded-2xl border border-gray-200 p-4">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                             <InputLabel value="1. Passport-style Face Photo" />
                             <div className="mt-2 flex items-center gap-3">
                                 {previews.passport_photo ? (
@@ -269,14 +269,14 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                         className="h-16 w-16 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                     />
                                 ) : (
-                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                         <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                                         </svg>
                                     </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm">
                                         Choose Photo
                                         <input
                                             type="file"
@@ -285,7 +285,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                             className="hidden"
                                         />
                                     </label>
-                                    <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.passport_photo || undefined}>
+                                    <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.passport_photo || undefined}>
                                         {fileNames.passport_photo || (user.passport_photo_path ? 'Current photo saved' : 'No file chosen')}
                                     </span>
                                 </div>
@@ -294,7 +294,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                         </div>
 
                         {/* 2. NRC Front Photo */}
-                        <div className="overflow-hidden rounded-2xl border border-gray-200 p-4">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                             <InputLabel value="2. NRC Front Card Photo" />
                             <div className="mt-2 flex items-center gap-3">
                                 {previews.nrc_front ? (
@@ -304,12 +304,12 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                         className="h-16 w-20 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                     />
                                 ) : (
-                                    <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                    <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                         <span className="text-[10px] font-bold">NRC Front</span>
                                     </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm">
                                         Choose Photo
                                         <input
                                             type="file"
@@ -318,7 +318,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                             className="hidden"
                                         />
                                     </label>
-                                    <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.nrc_front || undefined}>
+                                    <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.nrc_front || undefined}>
                                         {fileNames.nrc_front || (user.nrc_front_path ? 'Current photo saved' : 'No file chosen')}
                                     </span>
                                 </div>
@@ -327,7 +327,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                         </div>
 
                         {/* 3. NRC Back Photo */}
-                        <div className="overflow-hidden rounded-2xl border border-gray-200 p-4">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                             <InputLabel value="3. NRC Back Card Photo" />
                             <div className="mt-2 flex items-center gap-3">
                                 {previews.nrc_back ? (
@@ -337,12 +337,12 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                         className="h-16 w-20 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                     />
                                 ) : (
-                                    <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                    <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                         <span className="text-[10px] font-bold">NRC Back</span>
                                     </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm">
                                         Choose Photo
                                         <input
                                             type="file"
@@ -351,7 +351,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                             className="hidden"
                                         />
                                     </label>
-                                    <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.nrc_back || undefined}>
+                                    <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.nrc_back || undefined}>
                                         {fileNames.nrc_back || (user.nrc_back_path ? 'Current photo saved' : 'No file chosen')}
                                     </span>
                                 </div>
@@ -360,7 +360,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                         </div>
 
                         {/* 4. Payment QR (KPay / WavePay) */}
-                        <div className="overflow-hidden rounded-2xl border border-gray-200 p-4">
+                        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-slate-800 p-4">
                             <InputLabel value="4. Payment QR Code (KPay / WavePay - Optional)" />
                             <div className="mt-2 flex items-center gap-3">
                                 {previews.payment_qr ? (
@@ -370,12 +370,12 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                         className="h-16 w-16 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
                                     />
                                 ) : (
-                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500">
                                         <span className="text-[10px] font-bold">QR</span>
                                     </div>
                                 )}
                                 <div className="min-w-0 flex-1">
-                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm">
+                                    <label className="inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-sm">
                                         Choose QR Image
                                         <input
                                             type="file"
@@ -384,7 +384,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                                             className="hidden"
                                         />
                                     </label>
-                                    <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.payment_qr || undefined}>
+                                    <span className="mt-1 block truncate text-xs text-gray-500 dark:text-slate-400" title={fileNames.payment_qr || undefined}>
                                         {fileNames.payment_qr || (user.payment_qr_path ? 'Current QR saved' : 'No file chosen')}
                                     </span>
                                 </div>
@@ -395,7 +395,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                 </div>
 
                 {(errors as Record<string, string | undefined>).profile_limit && (
-                    <div className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-700 ring-1 ring-red-200">
+                    <div className="rounded-xl bg-red-50 dark:bg-red-950/40 p-3 text-xs font-semibold text-red-700 dark:text-red-300 ring-1 ring-red-200 dark:ring-red-900/50">
                         {(errors as Record<string, string | undefined>).profile_limit}
                     </div>
                 )}
@@ -410,7 +410,7 @@ export default function UpdateKycInformationForm({ className = '' }: { className
                     </PrimaryButton>
 
                     {recentlySuccessful && (
-                        <p className="text-xs font-semibold text-emerald-600">Saved successfully.</p>
+                        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Saved successfully.</p>
                     )}
                 </div>
             </form>
