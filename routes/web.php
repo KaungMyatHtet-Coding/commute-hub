@@ -56,6 +56,10 @@ Route::middleware('auth')->group(function () {
     // My Trips (dual driver/passenger trips view)
     Route::get('/trips', [\App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
 
+    // In-App Notifications
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+    Route::patch('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
     Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1');

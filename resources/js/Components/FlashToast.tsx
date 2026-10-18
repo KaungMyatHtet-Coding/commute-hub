@@ -66,7 +66,7 @@ export default function FlashToast() {
         <div
             role="alert"
             aria-live="polite"
-            className={`fixed right-4 top-4 z-50 flex max-w-sm items-start gap-3 rounded-2xl px-4 py-3 shadow-lg ${STYLES[msg.type]}`}
+            className={`fixed bottom-6 right-6 z-50 flex max-w-sm items-start gap-3 rounded-2xl px-4 py-3.5 shadow-xl transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 ${STYLES[msg.type]}`}
         >
             <span className={`mt-0.5 shrink-0 ${ICON_STYLES[msg.type]}`}>
                 {ICONS[msg.type]}

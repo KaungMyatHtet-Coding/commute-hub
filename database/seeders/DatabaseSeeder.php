@@ -60,8 +60,28 @@ class DatabaseSeeder extends Seeder
             ]);
             $passengers->each->assignRole('passenger');
 
-            $rideOne = $this->ride($aung, ['make' => 'Toyota', 'model' => 'Probox', 'color' => 'White', 'manufacture_year' => 2018, 'license_plate' => 'YGN-7K-1234', 'seat_capacity' => 4, 'is_verified' => true], now()->addDay()->setTime(7, 30), 4, 2500, ['Hledan Junction', 'Myaynigone', 'Sule Pagoda', 'Downtown Yangon']);
-            $rideTwo = $this->ride($susu, ['make' => 'Honda', 'model' => 'Fit', 'color' => 'Silver', 'manufacture_year' => 2019, 'license_plate' => 'YGN-3M-5678', 'seat_capacity' => 3, 'is_verified' => true], now()->addDay()->setTime(8, 0), 3, 3000, ['Insein Road', 'Junction Square', 'Shwedagon Pagoda', 'Bahan Township']);
+            $rideOne = $this->ride(
+                $aung,
+                ['make' => 'Toyota', 'model' => 'Probox', 'color' => 'White', 'manufacture_year' => 2018, 'license_plate' => 'YGN-7K-1234', 'seat_capacity' => 4, 'is_verified' => true],
+                now()->addDay()->setTime(7, 30),
+                4,
+                2500,
+                'Kamayut',
+                'Kyauktada',
+                ['ac_on', 'no_smoking'],
+                ['Hledan Junction', 'Myaynigone', 'Sule Pagoda', 'Downtown Yangon']
+            );
+            $rideTwo = $this->ride(
+                $susu,
+                ['make' => 'Honda', 'model' => 'Fit', 'color' => 'Silver', 'manufacture_year' => 2019, 'license_plate' => 'YGN-3M-5678', 'seat_capacity' => 3, 'is_verified' => true],
+                now()->addDay()->setTime(8, 0),
+                3,
+                3000,
+                'Insein',
+                'Bahan',
+                ['ladies_only', 'ac_on', 'no_smoking'],
+                ['Insein Road', 'Junction Square', 'Shwedagon Pagoda', 'Bahan Township']
+            );
 
             $this->acceptedBooking($rideOne, $passengers[0], 0, 3, 1);
             $this->acceptedBooking($rideOne, $passengers[1], 1, 3, 1);
@@ -89,10 +109,22 @@ class DatabaseSeeder extends Seeder
         return $driver;
     }
 
-    private function ride(User $driver, array $vehicleData, $departure, int $seats, int $price, array $stopNames): Ride
+    private function ride(User $driver, array $vehicleData, $departure, int $seats, int $price, string $origin, string $destination, array $rules, array $stopNames): Ride
     {
         $vehicle = Vehicle::create(['user_id' => $driver->id, ...$vehicleData, 'is_active' => true]);
-        $ride = Ride::create(['driver_id' => $driver->id, 'vehicle_id' => $vehicle->id, 'departure_time' => $departure, 'total_seats' => $seats, 'available_seats' => $seats, 'price_per_seat' => $price, 'status' => 'scheduled', 'notes' => 'Weekday morning commute.']);
+        $ride = Ride::create([
+            'driver_id'            => $driver->id,
+            'vehicle_id'           => $vehicle->id,
+            'origin_township'      => $origin,
+            'destination_township' => $destination,
+            'departure_time'       => $departure,
+            'total_seats'          => $seats,
+            'available_seats'      => $seats,
+            'price_per_seat'       => $price,
+            'status'               => 'scheduled',
+            'notes'                => 'Weekday morning commute.',
+            'ride_rules'           => $rules,
+        ]);
         foreach ($stopNames as $order => $name) {
             RideStop::create(['ride_id' => $ride->id, 'stop_name' => $name, 'stop_order' => $order + 1, 'estimated_time' => $departure->copy()->addMinutes($order * 15)]);
         }

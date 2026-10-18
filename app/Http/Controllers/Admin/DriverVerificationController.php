@@ -79,6 +79,8 @@ class DriverVerificationController extends Controller
             $user->vehicles()->update(['is_verified' => true]);
         });
 
+        app(\App\Services\NotificationService::class)->driverApplicationApproved($user);
+
         return back()->with('success', "Driver application for {$user->name} has been approved successfully.");
     }
 
@@ -108,6 +110,8 @@ class DriverVerificationController extends Controller
             $user->vehicles()->update(['is_verified' => false]);
         });
 
+        app(\App\Services\NotificationService::class)->driverApplicationRejected($user, $validated['reason']);
+
         return back()->with('success', "Driver application for {$user->name} has been rejected.");
     }
 
@@ -127,6 +131,8 @@ class DriverVerificationController extends Controller
         $user->pending_profile_data = null;
         $user->save();
 
+        app(\App\Services\NotificationService::class)->profileUpdateApproved($user);
+
         return back()->with('success', "Profile update request for {$user->name} has been approved.");
     }
 
@@ -141,6 +147,8 @@ class DriverVerificationController extends Controller
 
         $user->pending_profile_data = null;
         $user->save();
+
+        app(\App\Services\NotificationService::class)->profileUpdateRejected($user, $validated['reason']);
 
         return back()->with('success', "Profile update request for {$user->name} was rejected: {$validated['reason']}");
     }

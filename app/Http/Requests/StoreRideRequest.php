@@ -33,6 +33,14 @@ class StoreRideRequest extends FormRequest
                 }),
             ],
 
+            // Origin and Destination townships in Yangon
+            'origin_township' => ['required', 'string', 'max:80', Rule::in(config('townships.yangon', []))],
+            'destination_township' => ['required', 'string', 'max:80', 'different:origin_township', Rule::in(config('townships.yangon', []))],
+
+            // Ride rules and preferences
+            'ride_rules' => ['nullable', 'array'],
+            'ride_rules.*' => ['string', 'in:ladies_only,ac_on,no_smoking,small_luggage'],
+
             // Departure must be a valid datetime in the future.
             'departure_time' => ['required', 'date', 'after:now'],
 
@@ -57,6 +65,9 @@ class StoreRideRequest extends FormRequest
     {
         return [
             'vehicle_id.exists'            => 'The selected vehicle does not belong to your account or is inactive.',
+            'origin_township.required'     => 'Please select an origin township in Yangon.',
+            'destination_township.required' => 'Please select a destination township in Yangon.',
+            'destination_township.different' => 'Destination township must be different from origin township.',
             'departure_time.after'         => 'Departure time must be in the future.',
             'available_seats.max'          => 'Available seats cannot exceed your vehicle\'s seating capacity.',
             'stops.*.stop_name.required_with'      => 'Each stop must have a name.',

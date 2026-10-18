@@ -12,12 +12,15 @@ class Ride extends Model
     protected $fillable = [
         'driver_id',
         'vehicle_id',
+        'origin_township',
+        'destination_township',
         'departure_time',
         'total_seats',
         'available_seats',
         'price_per_seat',
         'status',
         'notes',
+        'ride_rules',
         'cancellation_reason',
     ];
 
@@ -30,6 +33,7 @@ class Ride extends Model
             'available_seats' => 'integer',
             'departure_time' => 'datetime',
             'price_per_seat' => 'decimal:2',
+            'ride_rules' => 'array',
         ];
     }
 

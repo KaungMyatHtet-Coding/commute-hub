@@ -1,6 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ConfirmModal from '@/Components/ConfirmModal';
 import { PageProps } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -142,6 +144,21 @@ export default function Dashboard() {
     const isDriver = user?.roles?.includes('driver') ?? false;
     const isAdmin = user?.roles?.includes('admin') ?? false;
 
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        title: string;
+        message: string;
+        confirmText: string;
+        confirmColor: 'red' | 'emerald' | 'indigo' | 'purple';
+        onConfirm: () => void;
+    }>({
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        confirmColor: 'indigo',
+        onConfirm: () => {},
+    });
+
     const cards: ActionCard[] = [
         ...(route().has('rides.index')
             ? [{
@@ -278,8 +295,16 @@ export default function Dashboard() {
                                     {activeRide.status === 'scheduled' && (
                                         <button
                                             onClick={() => {
-                                                if (!confirm('Start this trip now?')) return;
-                                                router.patch(route('rides.start', activeRide.id), {}, { preserveScroll: true });
+                                                setConfirmConfig({
+                                                    title: 'Start Trip',
+                                                    message: 'Are you ready to start this trip now? Cancellations will be locked once in progress.',
+                                                    confirmText: 'Start Trip',
+                                                    confirmColor: 'emerald',
+                                                    onConfirm: () => {
+                                                        router.patch(route('rides.start', activeRide.id), {}, { preserveScroll: true });
+                                                    },
+                                                });
+                                                setConfirmModalOpen(true);
                                             }}
                                             className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
                                         >
@@ -289,8 +314,16 @@ export default function Dashboard() {
                                     {activeRide.status === 'in_progress' && (
                                         <button
                                             onClick={() => {
-                                                if (!confirm('Complete this trip?')) return;
-                                                router.patch(route('rides.complete', activeRide.id), {}, { preserveScroll: true });
+                                                setConfirmConfig({
+                                                    title: 'Complete Trip',
+                                                    message: 'Are you sure you want to mark this trip as completed? All accepted passenger bookings will be updated to completed.',
+                                                    confirmText: 'Complete Trip',
+                                                    confirmColor: 'indigo',
+                                                    onConfirm: () => {
+                                                        router.patch(route('rides.complete', activeRide.id), {}, { preserveScroll: true });
+                                                    },
+                                                });
+                                                setConfirmModalOpen(true);
                                             }}
                                             className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
                                         >
@@ -444,6 +477,17 @@ export default function Dashboard() {
 
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmModal
+                isOpen={confirmModalOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                confirmText={confirmConfig.confirmText}
+                confirmColor={confirmConfig.confirmColor}
+                onConfirm={confirmConfig.onConfirm}
+                onClose={() => setConfirmModalOpen(false)}
+            />
         </AuthenticatedLayout>
     );
 }

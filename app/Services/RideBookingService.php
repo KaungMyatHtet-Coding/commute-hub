@@ -10,9 +10,13 @@ use Illuminate\Validation\ValidationException;
 
 class RideBookingService
 {
+    public function __construct(
+        private readonly NotificationService $notifications = new NotificationService()
+    ) {}
+
     public function request(Ride $ride, User $passenger, int $pickupStopId, int $dropoffStopId, int $seats): RideBooking
     {
-        return DB::transaction(function () use ($ride, $passenger, $pickupStopId, $dropoffStopId, $seats): RideBooking {
+        $booking = DB::transaction(function () use ($ride, $passenger, $pickupStopId, $dropoffStopId, $seats): RideBooking {
             $ride = Ride::query()->lockForUpdate()->findOrFail($ride->id);
             $this->validateStops($ride, $pickupStopId, $dropoffStopId);
             if ($ride->status !== 'scheduled' || $ride->departure_time->isPast()) {
@@ -61,11 +65,14 @@ class RideBookingService
             ]);
         }, attempts: 3);
 
+        $this->notifications->bookingRequested($booking);
+
+        return $booking;
     }
 
     public function accept(RideBooking $booking): RideBooking
     {
-        return DB::transaction(function () use ($booking): RideBooking {
+        $result = DB::transaction(function () use ($booking): RideBooking {
             $booking = RideBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $ride = Ride::query()->lockForUpdate()->findOrFail($booking->ride_id);
             if ($booking->status !== 'pending') {
@@ -79,11 +86,15 @@ class RideBookingService
 
             return $booking->fresh();
         }, attempts: 3);
+
+        $this->notifications->bookingAccepted($result);
+
+        return $result;
     }
 
     public function reject(RideBooking $booking): RideBooking
     {
-        return DB::transaction(function () use ($booking): RideBooking {
+        $result = DB::transaction(function () use ($booking): RideBooking {
             $booking = RideBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $ride = Ride::query()->lockForUpdate()->findOrFail($booking->ride_id);
             if (! in_array($booking->status, ['pending', 'accepted'], true)) {
@@ -96,11 +107,15 @@ class RideBookingService
 
             return $booking->fresh();
         }, attempts: 3);
+
+        $this->notifications->bookingRejected($result);
+
+        return $result;
     }
 
     public function cancel(RideBooking $booking, ?string $reason = null): RideBooking
     {
-        return DB::transaction(function () use ($booking, $reason): RideBooking {
+        $result = DB::transaction(function () use ($booking, $reason): RideBooking {
             $booking = RideBooking::query()->lockForUpdate()->findOrFail($booking->id);
             $ride = Ride::query()->lockForUpdate()->findOrFail($booking->ride_id);
 
@@ -124,6 +139,10 @@ class RideBookingService
 
             return $booking->fresh();
         }, attempts: 3);
+
+        $this->notifications->bookingCancelledByPassenger($result, $reason ?? '');
+
+        return $result;
     }
 
 

@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CancelModal from '@/Components/CancelModal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import ReviewModal from '@/Components/ReviewModal';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
@@ -477,17 +478,48 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
     const [reviewTargetBooking, setReviewTargetBooking] = useState<Booking | null>(null);
 
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        title: string;
+        message: string;
+        confirmText: string;
+        confirmColor: 'red' | 'emerald' | 'indigo' | 'purple';
+        onConfirm: () => void;
+    }>({
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        confirmColor: 'indigo',
+        onConfirm: () => {},
+    });
+
     const totalPassengerCount = upcoming.length + past.length;
 
     // ── Driver Trip Lifecycle Actions ──
     function handleStartRide(ride: OfferedRide) {
-        if (!confirm('Start this trip now? Cancellations will be locked once in progress.')) return;
-        router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+        setConfirmConfig({
+            title: 'Start Trip',
+            message: 'Start this trip now? Cancellations will be locked once in progress.',
+            confirmText: 'Start Trip',
+            confirmColor: 'emerald',
+            onConfirm: () => {
+                router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+            },
+        });
+        setConfirmModalOpen(true);
     }
 
     function handleCompleteRide(ride: OfferedRide) {
-        if (!confirm('Complete this trip? All accepted passenger bookings will be marked completed.')) return;
-        router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+        setConfirmConfig({
+            title: 'Complete Trip',
+            message: 'Complete this trip? All accepted passenger bookings will be marked completed.',
+            confirmText: 'Complete Trip',
+            confirmColor: 'indigo',
+            onConfirm: () => {
+                router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+            },
+        });
+        setConfirmModalOpen(true);
     }
 
     function handleOpenCancelRide(ride: OfferedRide) {
@@ -728,6 +760,17 @@ export default function BookingsIndex({ upcoming = [], past = [], offeredRides =
                 roleLabel="Driver"
                 onClose={() => setReviewModalOpen(false)}
                 onSubmit={handleSubmitReview}
+            />
+
+            {/* ── Confirm Modal ── */}
+            <ConfirmModal
+                isOpen={confirmModalOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                confirmText={confirmConfig.confirmText}
+                confirmColor={confirmConfig.confirmColor}
+                onConfirm={confirmConfig.onConfirm}
+                onClose={() => setConfirmModalOpen(false)}
             />
         </AuthenticatedLayout>
     );

@@ -62,6 +62,16 @@ class HandleInertiaRequests extends Middleware
                     )
                     : null,
             ],
+            // In-app bell notifications
+            'notifications' => $request->user() ? [
+                'unread_count' => \App\Models\AppNotification::where('user_id', $request->user()->id)
+                    ->whereNull('read_at')
+                    ->count(),
+                'recent' => \App\Models\AppNotification::where('user_id', $request->user()->id)
+                    ->latest()
+                    ->limit(8)
+                    ->get(['id', 'title', 'message', 'type', 'action_url', 'read_at', 'created_at']),
+            ] : null,
             // Flash messages — read by the FlashToast React component.
             'flash' => [
                 'success' => $request->session()->get('success'),

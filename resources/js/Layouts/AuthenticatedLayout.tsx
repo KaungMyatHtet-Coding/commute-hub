@@ -3,6 +3,7 @@ import Dropdown from '@/Components/Dropdown';
 import FlashToast from '@/Components/FlashToast';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import NotificationBell from '@/Components/NotificationBell';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
@@ -146,21 +147,23 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        {/* ── Right: User dropdown ── */}
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                        {/* ── Right: User dropdown & Notification bell ── */}
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center sm:gap-2">
+                            <NotificationBell />
+
                             {/* Role badge */}
                             {isAdmin && (
-                                <span className="me-2 inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200">
+                                <span className="ms-1 inline-flex items-center rounded-full bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700 ring-1 ring-inset ring-purple-200">
                                     Admin
                                 </span>
                             )}
                             {isDriver && (
-                                <span className="me-3 inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
+                                <span className="ms-1 inline-flex items-center rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
                                     Driver
                                 </span>
                             )}
 
-                            <div className="relative ms-3">
+                            <div className="relative ms-2">
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <span className="inline-flex rounded-md">
@@ -220,8 +223,9 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        {/* ── Hamburger (mobile) ── */}
-                        <div className="-me-2 flex items-center sm:hidden">
+                        {/* ── Hamburger & Mobile Bell ── */}
+                        <div className="-me-2 flex items-center gap-1 sm:hidden">
+                            <NotificationBell />
                             <button
                                 onClick={() =>
                                     setShowingNavigationDropdown(

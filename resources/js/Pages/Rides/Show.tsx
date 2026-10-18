@@ -1,6 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CancelModal from '@/Components/CancelModal';
+import ConfirmModal from '@/Components/ConfirmModal';
 import ReviewModal from '@/Components/ReviewModal';
+import { RIDE_RULES } from '@/Constants/yangonTownships';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import type { PageProps } from '@/types';
@@ -18,6 +20,11 @@ interface RideDriver {
     id: number;
     name: string;
     email: string;
+    phone?: string | null;
+    gender?: string | null;
+    passport_photo_path?: string | null;
+    payment_qr_path?: string | null;
+    driver_license_number?: string | null;
 }
 
 interface RideVehicle {
@@ -25,8 +32,10 @@ interface RideVehicle {
     make: string;
     model: string;
     color: string | null;
+    manufacture_year?: number | null;
     license_plate: string;
     seat_capacity: number;
+    vehicle_photo_path?: string | null;
 }
 
 interface Review {
@@ -43,12 +52,15 @@ interface Ride {
     driver_id: number;
     driver: RideDriver;
     vehicle: RideVehicle;
+    origin_township: string;
+    destination_township: string;
     departure_time: string;
     available_seats: number;
     total_seats: number;
     price_per_seat: string;
     status: string; // 'scheduled' | 'in_progress' | 'completed' | 'cancelled'
     notes: string | null;
+    ride_rules?: string[] | null;
     cancellation_reason?: string | null;
     stops: RideStop[];
 }
@@ -64,6 +76,9 @@ interface PassengerBooking {
         id: number;
         name: string;
         email: string;
+        phone?: string | null;
+        passport_photo_path?: string | null;
+        gender?: string | null;
     };
     pickupStop: {
         id: number;
@@ -100,6 +115,7 @@ interface Props extends PageProps {
     existingBooking?: ExistingBooking | null;
     driverRating?: number;
     driverReviewCount?: number;
+    maskedLicense?: string | null;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -184,11 +200,13 @@ function DriverBookingsManagement({
     bookings,
     currentUserId,
     onOpenReviewModal,
+    onRejectRequest,
 }: {
     ride: Ride;
     bookings: PassengerBooking[];
     currentUserId: number;
     onOpenReviewModal: (bookingId: number, targetName: string) => void;
+    onRejectRequest: (bookingId: number, passengerName: string) => void;
 }) {
     const pendingBookings = bookings.filter((b) => b.status === 'pending');
     const otherBookings = bookings.filter((b) => b.status !== 'pending');
@@ -200,11 +218,8 @@ function DriverBookingsManagement({
         });
     }
 
-    function handleReject(id: number) {
-        if (!confirm('Are you sure you want to decline/reject this booking request?')) return;
-        router.patch(route('bookings.reject', id), {}, {
-            preserveScroll: true,
-        });
+    function handleReject(id: number, passengerName: string) {
+        onRejectRequest(id, passengerName);
     }
 
     return (
@@ -285,7 +300,7 @@ function DriverBookingsManagement({
                                                         Accept
                                                     </button>
                                                     <button
-                                                        onClick={() => handleReject(booking.id)}
+                                                        onClick={() => handleReject(booking.id, booking.passenger.name)}
                                                         className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-3.5 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
                                                     >
                                                         <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -383,7 +398,7 @@ function DriverBookingsManagement({
                                                     {/* Cancel / Reject button before trip starts */}
                                                     {isAccepted && ride.status !== 'in_progress' && ride.status !== 'completed' && (
                                                         <button
-                                                            onClick={() => handleReject(booking.id)}
+                                                            onClick={() => handleReject(booking.id, booking.passenger.name)}
                                                             className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition"
                                                         >
                                                             Cancel Seat
@@ -480,15 +495,52 @@ function BookingForm({
 
     const orderedStops = [...ride.stops].sort((a, b) => a.stop_order - b.stop_order);
 
-    const pickupStop = orderedStops.find((s) => String(s.id) === data.pickup_stop_id);
+    // If there is only 1 stop (edge case), create a virtual destination
+    const effectiveStops = orderedStops.length >= 2
+        ? orderedStops
+        : [
+            orderedStops[0] ?? {
+                id: 1,
+                stop_name: `${ride.origin_township} (Start)`,
+                stop_order: 1,
+                estimated_time: ride.departure_time,
+            },
+            {
+                id: 999999,
+                stop_name: `${ride.destination_township} (End)`,
+                stop_order: 2,
+                estimated_time: null,
+            },
+        ];
+
+    // Pickup candidates are all stops except the final destination
+    const pickupCandidates = effectiveStops.slice(0, -1);
+
+    const pickupStop = effectiveStops.find((s) => String(s.id) === data.pickup_stop_id);
     const dropoffCandidates = pickupStop
-        ? orderedStops.filter((s) => s.stop_order > pickupStop.stop_order)
-        : orderedStops.slice(1);
+        ? effectiveStops.filter((s) => s.stop_order > pickupStop.stop_order)
+        : effectiveStops.slice(1);
 
     const availableOptions = Array.from(
         { length: ride.available_seats },
         (_, i) => i + 1,
     );
+
+    const handlePickupChange = (pickupId: string) => {
+        const selected = effectiveStops.find((s) => String(s.id) === pickupId);
+        const nextDropoffs = selected
+            ? effectiveStops.filter((s) => s.stop_order > selected.stop_order)
+            : [];
+        
+        // Auto-select the final stop as the default drop-off for quick booking
+        const defaultDropoff = nextDropoffs.length > 0 ? String(nextDropoffs[nextDropoffs.length - 1].id) : '';
+
+        setData((prev) => ({
+            ...prev,
+            pickup_stop_id: pickupId,
+            dropoff_stop_id: defaultDropoff,
+        }));
+    };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -499,23 +551,21 @@ function BookingForm({
                 </label>
                 <select
                     value={data.pickup_stop_id}
-                    onChange={(e) => {
-                        setData((prev) => ({
-                            ...prev,
-                            pickup_stop_id: e.target.value,
-                            dropoff_stop_id: '',
-                        }));
-                    }}
+                    onChange={(e) => handlePickupChange(e.target.value)}
                     className="w-full rounded-xl border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                 >
                     <option value="">Select pickup landmark…</option>
-                    {orderedStops.slice(0, -1).map((s) => (
-                        <option key={s.id} value={String(s.id)}>
-                            {s.stop_name}
-                            {s.estimated_time ? ` (${formatTime(s.estimated_time)})` : ''}
-                        </option>
-                    ))}
+                    {pickupCandidates.map((s, idx) => {
+                        const isStart = idx === 0;
+                        const timeStr = s.estimated_time ? ` - ${formatTime(s.estimated_time)}` : '';
+                        const tag = isStart ? ' (Start)' : '';
+                        return (
+                            <option key={s.id} value={String(s.id)}>
+                                {s.stop_order}. {s.stop_name}{tag}{timeStr}
+                            </option>
+                        );
+                    })}
                 </select>
                 {errors.pickup_stop_id && (
                     <p className="mt-1 text-xs text-red-600">{errors.pickup_stop_id}</p>
@@ -535,12 +585,16 @@ function BookingForm({
                     required
                 >
                     <option value="">Select drop-off landmark…</option>
-                    {dropoffCandidates.map((s) => (
-                        <option key={s.id} value={String(s.id)}>
-                            {s.stop_name}
-                            {s.estimated_time ? ` (${formatTime(s.estimated_time)})` : ''}
-                        </option>
-                    ))}
+                    {dropoffCandidates.map((s, idx) => {
+                        const isFinal = idx === dropoffCandidates.length - 1;
+                        const timeStr = s.estimated_time ? ` - ${formatTime(s.estimated_time)}` : '';
+                        const tag = isFinal ? ' (Final Destination)' : '';
+                        return (
+                            <option key={s.id} value={String(s.id)}>
+                                {s.stop_order}. {s.stop_name}{tag}{timeStr}
+                            </option>
+                        );
+                    })}
                 </select>
                 {errors.dropoff_stop_id && (
                     <p className="mt-1 text-xs text-red-600">{errors.dropoff_stop_id}</p>
@@ -601,6 +655,7 @@ export default function RidesShow({
     existingBooking = null,
     driverRating = 0,
     driverReviewCount = 0,
+    maskedLicense = null,
 }: Props) {
     const { auth } = usePage<Props>().props;
     const isOwnerDriver = Boolean(isDriverProp || (auth?.user && Number(auth.user.id) === Number(ride.driver_id)));
@@ -614,6 +669,11 @@ export default function RidesShow({
     const [reviewTargetBookingId, setReviewTargetBookingId] = useState<number | null>(null);
     const [reviewTargetName, setReviewTargetName] = useState<string>('');
     const [reviewTargetRole, setReviewTargetRole] = useState<'Driver' | 'Passenger'>('Driver');
+
+    // Rich Inspection Modals & Share State
+    const [vehicleLightboxOpen, setVehicleLightboxOpen] = useState(false);
+    const [paymentQrModalOpen, setPaymentQrModalOpen] = useState(false);
+    const [shareCopied, setShareCopied] = useState(false);
 
     const hasActiveBooking = Boolean(
         existingBooking && ['pending', 'accepted'].includes(existingBooking.status),
@@ -633,15 +693,63 @@ export default function RidesShow({
         (r) => Number(r.reviewer_id) === Number(auth.user.id),
     );
 
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [confirmConfig, setConfirmConfig] = useState<{
+        title: string;
+        message: string;
+        confirmText: string;
+        confirmColor: 'red' | 'emerald' | 'indigo' | 'purple';
+        onConfirm: () => void;
+    }>({
+        title: '',
+        message: '',
+        confirmText: 'Confirm',
+        confirmColor: 'indigo',
+        onConfirm: () => {},
+    });
+
+    // ── Share Trip / Emergency Info Handler ──
+    function handleShareTrip() {
+        const text = [
+            `🚨 CommuteHub Trip & Safety Info:`,
+            `Route: ${ride.origin_township} ➔ ${ride.destination_township}`,
+            `Departure: ${formatDateTime(ride.departure_time)}`,
+            `Driver: ${ride.driver.name} (Phone: ${ride.driver.phone || 'N/A'})`,
+            `Vehicle: ${ride.vehicle.make} ${ride.vehicle.model}${ride.vehicle.color ? ` (${ride.vehicle.color})` : ''}`,
+            `License Plate: ${ride.vehicle.license_plate}`,
+            `Tracking Link: ${window.location.href}`,
+        ].join('\n');
+
+        navigator.clipboard.writeText(text);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 3500);
+    }
+
     // ── Driver Lifecycle Handlers ──
     function handleStartTrip() {
-        if (!confirm('Start this trip now? Cancellations will be locked once in progress.')) return;
-        router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+        setConfirmConfig({
+            title: 'Start Trip',
+            message: 'Are you ready to start this trip now? Cancellations will be locked once in progress.',
+            confirmText: 'Start Trip',
+            confirmColor: 'emerald',
+            onConfirm: () => {
+                router.patch(route('rides.start', ride.id), {}, { preserveScroll: true });
+            },
+        });
+        setConfirmModalOpen(true);
     }
 
     function handleCompleteTrip() {
-        if (!confirm('Complete this trip? All accepted passenger bookings will be marked completed.')) return;
-        router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+        setConfirmConfig({
+            title: 'Complete Trip',
+            message: 'Are you sure you want to mark this trip as completed? All accepted passenger bookings will be updated to completed.',
+            confirmText: 'Complete Trip',
+            confirmColor: 'indigo',
+            onConfirm: () => {
+                router.patch(route('rides.complete', ride.id), {}, { preserveScroll: true });
+            },
+        });
+        setConfirmModalOpen(true);
     }
 
     // ── Cancellation Handler ──
@@ -807,67 +915,256 @@ export default function RidesShow({
                                         setReviewTargetRole('Passenger');
                                         setReviewModalOpen(true);
                                     }}
+                                    onRejectRequest={(bookingId, passengerName) => {
+                                        setConfirmConfig({
+                                            title: 'Decline Booking Request',
+                                            message: `Are you sure you want to decline ${passengerName}'s booking request?`,
+                                            confirmText: 'Decline Request',
+                                            confirmColor: 'red',
+                                            onConfirm: () => {
+                                                router.patch(route('bookings.reject', bookingId), {}, {
+                                                    preserveScroll: true,
+                                                });
+                                            },
+                                        });
+                                        setConfirmModalOpen(true);
+                                    }}
                                 />
                             )}
 
-                            {/* Driver card */}
+                            {/* Route & Rules Township Banner */}
+                            <div className="overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 p-5 shadow-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600 mb-1">
+                                            <span>Yangon Commute Route</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-lg font-extrabold text-gray-900">{ride.origin_township}</span>
+                                            <span className="text-gray-400 font-bold">➔</span>
+                                            <span className="text-lg font-extrabold text-indigo-700">{ride.destination_township}</span>
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Departure: <span className="font-medium text-gray-800">{formatDateTime(ride.departure_time)}</span>
+                                        </p>
+                                    </div>
+
+                                    {/* Emergency / Share Trip Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handleShareTrip}
+                                        className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-indigo-700 shadow-sm hover:bg-indigo-50 hover:border-indigo-300 transition shrink-0"
+                                    >
+                                        {shareCopied ? (
+                                            <>
+                                                <svg className="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                </svg>
+                                                <span className="text-emerald-700">Copied to Clipboard!</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <svg className="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                                </svg>
+                                                <span>Share Trip / Emergency Info</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+
+                                {/* Ride Rules Badges */}
+                                {ride.ride_rules && ride.ride_rules.length > 0 && (
+                                    <div className="mt-4 border-t border-indigo-100 pt-3">
+                                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-2">
+                                            Ride Preferences & Rules
+                                        </span>
+                                        <div className="flex flex-wrap gap-2">
+                                             {ride.ride_rules.map((ruleKey) => {
+                                                const rule = RIDE_RULES.find((r) => r.key === ruleKey);
+                                                if (!rule) return null;
+                                                const isLadies = rule.key === 'ladies_only';
+                                                return (
+                                                    <span
+                                                        key={rule.key}
+                                                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                                            isLadies
+                                                                ? 'bg-pink-100 text-pink-800 ring-1 ring-pink-300'
+                                                                : 'bg-white text-gray-700 ring-1 ring-gray-200 shadow-2xs'
+                                                        }`}
+                                                    >
+                                                        <span>{rule.icon}</span>
+                                                        <span>{rule.label}</span>
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Driver Card */}
                             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                    Driver
+                                    Driver Information
                                 </h3>
-                                <div className="flex items-center justify-between gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-lg font-bold text-indigo-600">
-                                            {ride.driver.name.charAt(0).toUpperCase()}
-                                        </div>
+                                        {ride.driver.passport_photo_path ? (
+                                            <img
+                                                src={`/storage/${ride.driver.passport_photo_path}`}
+                                                alt={ride.driver.name}
+                                                className="h-14 w-14 rounded-full object-cover border-2 border-indigo-200 shadow-sm"
+                                            />
+                                        ) : (
+                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-600">
+                                                {ride.driver.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                         <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-semibold text-gray-900">{ride.driver.name}</p>
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <p className="font-bold text-gray-900 text-base">{ride.driver.name}</p>
+                                                {ride.driver.gender && (
+                                                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
+                                                        ride.driver.gender === 'female'
+                                                            ? 'bg-pink-50 text-pink-700 ring-1 ring-pink-200'
+                                                            : 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                                                    }`}>
+                                                        {ride.driver.gender}
+                                                    </span>
+                                                )}
+                                                {maskedLicense && (
+                                                    <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
+                                                        <span>🛡️ License</span>
+                                                        <span>{maskedLicense}</span>
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                                                 {driverRating > 0 ? (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                                                    <span className="inline-flex items-center gap-1 font-semibold text-amber-700">
                                                         ★ {driverRating.toFixed(1)}
-                                                        <span className="text-gray-400 font-normal">({driverReviewCount})</span>
+                                                        <span className="text-gray-400 font-normal">({driverReviewCount} reviews)</span>
                                                     </span>
                                                 ) : (
                                                     <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
                                                         New Driver
                                                     </span>
                                                 )}
+                                                <span>·</span>
+                                                <span>{ride.driver.email}</span>
                                             </div>
-                                            <p className="text-sm text-gray-500">{ride.driver.email}</p>
                                         </div>
                                     </div>
+
+                                    {/* Click to Call Driver */}
+                                    {ride.driver.phone && (
+                                        <a
+                                            href={`tel:${ride.driver.phone}`}
+                                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition shrink-0"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                                            </svg>
+                                            <span>Call {ride.driver.phone}</span>
+                                        </a>
+                                    )}
                                 </div>
                             </div>
 
-                            {/* Vehicle card */}
+                            {/* Vehicle Card with Photo & Lightbox */}
                             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                    Vehicle
+                                    Vehicle Inspection
                                 </h3>
-                                <div className="flex items-center gap-4">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                                        <svg className="h-6 w-6 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                                        </svg>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        {ride.vehicle.vehicle_photo_path ? (
+                                            <div
+                                                onClick={() => setVehicleLightboxOpen(true)}
+                                                className="group relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-gray-200 bg-gray-50 shadow-sm transition hover:opacity-90"
+                                            >
+                                                <img
+                                                    src={`/storage/${ride.vehicle.vehicle_photo_path}`}
+                                                    alt={`${ride.vehicle.make} ${ride.vehicle.model}`}
+                                                    className="h-full w-full object-cover transition group-hover:scale-105"
+                                                />
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition">
+                                                    <span className="text-[10px] font-bold text-white uppercase tracking-wider">Inspect</span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gray-100">
+                                                <svg className="h-7 w-7 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                                </svg>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-bold text-gray-900 text-base">
+                                                    {ride.vehicle.make} {ride.vehicle.model}
+                                                    {ride.vehicle.manufacture_year ? ` (${ride.vehicle.manufacture_year})` : ''}
+                                                </p>
+                                            </div>
+                                            <div className="mt-1 flex items-center gap-2 flex-wrap">
+                                                <span className="rounded-md bg-gray-900 px-2.5 py-0.5 text-xs font-mono font-bold tracking-wider text-yellow-300 shadow-2xs">
+                                                    {ride.vehicle.license_plate}
+                                                </span>
+                                                {ride.vehicle.color && (
+                                                    <span className="text-xs text-gray-500">Color: {ride.vehicle.color}</span>
+                                                )}
+                                                <span className="text-xs text-gray-400">·</span>
+                                                <span className="text-xs text-gray-600 font-medium">{ride.vehicle.seat_capacity} passenger seats</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">
-                                            {ride.vehicle.make} {ride.vehicle.model}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {ride.vehicle.license_plate}
-                                            {ride.vehicle.color ? ` · ${ride.vehicle.color}` : ''}
-                                            {' · '}{ride.vehicle.seat_capacity} seats total
-                                        </p>
-                                    </div>
+
+                                    {ride.vehicle.vehicle_photo_path && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setVehicleLightboxOpen(true)}
+                                            className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition self-start sm:self-center shrink-0"
+                                        >
+                                            <svg className="h-3.5 w-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                                            </svg>
+                                            <span>View Car Photo</span>
+                                        </button>
+                                    )}
                                 </div>
                             </div>
+
+                            {/* Digital Payment / KPay QR Section */}
+                            {ride.driver.payment_qr_path && (
+                                <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-xs">
+                                                PAY
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-gray-900">KPay / WavePay QR Code Available</h4>
+                                                <p className="text-xs text-gray-600">Scan to pay fare directly without carrying cash.</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setPaymentQrModalOpen(true)}
+                                            className="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition shrink-0"
+                                        >
+                                            View QR Code
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Route timeline */}
                             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                                 <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                                    Route Stops
+                                    Route Stops & Schedule
                                 </h3>
                                 <StopTimeline stops={ride.stops} />
                             </div>
@@ -1080,6 +1377,119 @@ export default function RidesShow({
                 roleLabel={reviewTargetRole}
                 onClose={() => setReviewModalOpen(false)}
                 onSubmit={handleSubmitReview}
+            />
+
+            {/* ── Vehicle Lightbox Inspection Modal ── */}
+            {vehicleLightboxOpen && ride.vehicle.vehicle_photo_path && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setVehicleLightboxOpen(false)}
+                >
+                    <div
+                        className="relative max-w-3xl w-full overflow-hidden rounded-2xl bg-white shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+                            <div>
+                                <h3 className="text-base font-bold text-gray-900">
+                                    {ride.vehicle.make} {ride.vehicle.model}
+                                </h3>
+                                <p className="text-xs text-gray-500 font-mono">
+                                    Plate: {ride.vehicle.license_plate} · Capacity: {ride.vehicle.seat_capacity} seats
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setVehicleLightboxOpen(false)}
+                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="bg-gray-900 p-2 flex items-center justify-center max-h-[75vh]">
+                            <img
+                                src={`/storage/${ride.vehicle.vehicle_photo_path}`}
+                                alt={`${ride.vehicle.make} ${ride.vehicle.model}`}
+                                className="max-h-[70vh] w-auto max-w-full object-contain rounded-lg"
+                            />
+                        </div>
+                        <div className="px-6 py-3 bg-gray-50 text-right">
+                            <button
+                                type="button"
+                                onClick={() => setVehicleLightboxOpen(false)}
+                                className="rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold text-white hover:bg-gray-800 transition"
+                            >
+                                Close Inspection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Payment QR Code Modal ── */}
+            {paymentQrModalOpen && ride.driver.payment_qr_path && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs animate-in fade-in"
+                    onClick={() => setPaymentQrModalOpen(false)}
+                >
+                    <div
+                        className="relative max-w-md w-full overflow-hidden rounded-2xl bg-white shadow-2xl p-6 text-center space-y-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-3 text-left">
+                            <div>
+                                <h3 className="text-base font-bold text-gray-900">
+                                    Driver Payment QR
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {ride.driver.name} · {ride.driver.phone || 'Cashless payment'}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setPaymentQrModalOpen(false)}
+                                className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 inline-block mx-auto">
+                            <img
+                                src={`/storage/${ride.driver.payment_qr_path}`}
+                                alt="Driver Payment QR"
+                                className="max-h-72 w-auto max-w-full object-contain mx-auto rounded-lg shadow-xs"
+                            />
+                        </div>
+
+                        <p className="text-xs text-gray-500 leading-relaxed">
+                            Open KBZPay or WavePay app, scan this QR code, and transfer the agreed ride fare (${ride.price_per_seat} / seat).
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={() => setPaymentQrModalOpen(false)}
+                            className="w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                        >
+                            Done
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Confirm Modal ── */}
+            <ConfirmModal
+                isOpen={confirmModalOpen}
+                title={confirmConfig.title}
+                message={confirmConfig.message}
+                confirmText={confirmConfig.confirmText}
+                confirmColor={confirmConfig.confirmColor}
+                onConfirm={confirmConfig.onConfirm}
+                onClose={() => setConfirmModalOpen(false)}
             />
         </AuthenticatedLayout>
     );

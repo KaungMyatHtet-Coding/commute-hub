@@ -102,4 +102,10 @@ class User extends Authenticatable
     {
         return round((float) ($this->reviewsReceived()->avg('rating') ?? 0.0), 1);
     }
+
+    public function appNotifications()
+    {
+        return $this->hasMany(AppNotification::class)->latest();
+    }
 }
+

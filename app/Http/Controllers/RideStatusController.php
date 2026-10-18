@@ -75,6 +75,8 @@ class RideStatusController extends Controller
                 ]);
         });
 
+        app(\App\Services\NotificationService::class)->rideCancelledByDriver($ride, $validated['reason']);
+
         return back()->with('success', 'Trip has been cancelled and passengers have been notified.');
     }
 }

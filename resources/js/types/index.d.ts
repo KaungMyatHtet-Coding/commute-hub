@@ -24,6 +24,22 @@ export interface User {
     roles: string[];
 }
 
+export interface AppNotification {
+    id: number;
+    user_id: number;
+    title: string;
+    message: string;
+    type: string;
+    action_url?: string | null;
+    read_at?: string | null;
+    created_at: string;
+}
+
+export interface NotificationsData {
+    unread_count: number;
+    recent: AppNotification[];
+}
+
 export interface Flash {
     success?: string | null;
     error?: string | null;
@@ -36,6 +52,7 @@ export type PageProps<
     auth: {
         user: User;
     };
+    notifications?: NotificationsData | null;
     flash: Flash;
     [key: string]: unknown;
 };

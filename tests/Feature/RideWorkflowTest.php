@@ -49,12 +49,15 @@ class RideWorkflowTest extends TestCase
         $this->ride = Ride::create([
             'driver_id' => $this->driver->id,
             'vehicle_id' => $this->vehicle->id,
+            'origin_township' => 'Kamayut',
+            'destination_township' => 'Kyauktada',
             'departure_time' => now()->addDays(2),
             'total_seats' => 4,
             'available_seats' => 4,
             'price_per_seat' => 10.00,
             'status' => 'scheduled',
             'notes' => 'No smoking please',
+            'ride_rules' => ['ac_on', 'no_smoking'],
         ]);
 
         $this->pickupStop = RideStop::create([
@@ -313,5 +316,129 @@ class RideWorkflowTest extends TestCase
             'comment' => 'Premature review',
         ]);
         $response->assertSessionHasErrors(['rating']);
+    }
+
+    public function test_can_filter_rides_by_townships_and_ladies_only(): void
+    {
+        // Another ride with ladies_only and different townships
+        $ladiesRide = Ride::create([
+            'driver_id' => $this->driver->id,
+            'vehicle_id' => $this->vehicle->id,
+            'origin_township' => 'Sanchaung',
+            'destination_township' => 'Bahan',
+            'departure_time' => now()->addDays(3),
+            'total_seats' => 4,
+            'available_seats' => 4,
+            'price_per_seat' => 15.00,
+            'status' => 'scheduled',
+            'ride_rules' => ['ladies_only', 'ac_on'],
+        ]);
+
+        // Filter by origin_township
+        $res1 = $this->actingAs($this->passenger)->get('/rides?origin_township=Sanchaung');
+        $res1->assertOk();
+        $res1->assertInertia(fn ($page) => $page
+            ->component('Rides/Index')
+            ->has('rides.data', 1)
+            ->where('rides.data.0.origin_township', 'Sanchaung')
+        );
+
+        // Filter by ladies_only
+        $res2 = $this->actingAs($this->passenger)->get('/rides?ladies_only=1');
+        $res2->assertOk();
+        $res2->assertInertia(fn ($page) => $page
+            ->component('Rides/Index')
+            ->has('rides.data', 1)
+            ->where('rides.data.0.id', $ladiesRide->id)
+        );
+    }
+
+    public function test_notifications_are_created_on_booking_lifecycle_and_can_be_marked_read(): void
+    {
+        // Passenger requests a booking -> Driver should receive a notification
+        $response = $this->actingAs($this->passenger)->post("/rides/{$this->ride->id}/bookings", [
+            'pickup_stop_id' => $this->pickupStop->id,
+            'dropoff_stop_id' => $this->dropoffStop->id,
+            'seats_booked' => 1,
+        ]);
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->driver->id,
+            'type' => 'booking_requested',
+        ]);
+
+        $booking = RideBooking::where('ride_id', $this->ride->id)
+            ->where('passenger_id', $this->passenger->id)
+            ->first();
+        $this->assertNotNull($booking);
+
+        // Driver accepts the booking -> Passenger should receive a notification
+        $this->actingAs($this->driver)->patch("/bookings/{$booking->id}/accept");
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $this->passenger->id,
+            'type' => 'booking_accepted',
+        ]);
+
+        // Mark all notifications read
+        $markRead = $this->actingAs($this->passenger)->post('/notifications/mark-all-read');
+        $markRead->assertRedirect();
+
+        $this->assertEquals(0, $this->passenger->appNotifications()->unread()->count());
+    }
+
+    public function test_auto_includes_start_and_end_stops_when_creating_ride_with_fewer_than_two_stops(): void
+    {
+        // Post ride with 0 stops submitted
+        $response = $this->actingAs($this->driver)->post('/rides', [
+            'vehicle_id' => $this->vehicle->id,
+            'origin_township' => 'Tamwe',
+            'destination_township' => 'Yankin',
+            'departure_time' => now()->addDays(2)->format('Y-m-d\TH:i'),
+            'available_seats' => 3,
+            'price_per_seat' => 2000,
+            'stops' => [],
+        ]);
+
+        $response->assertRedirect();
+        $createdRide = Ride::where('origin_township', 'Tamwe')->where('destination_township', 'Yankin')->first();
+        $this->assertNotNull($createdRide);
+        $this->assertCount(2, $createdRide->stops);
+        $this->assertEquals('Tamwe (Start)', $createdRide->stops[0]->stop_name);
+        $this->assertEquals('Yankin (End)', $createdRide->stops[1]->stop_name);
+    }
+
+    public function test_show_auto_backfills_stops_if_existing_ride_has_only_one_stop(): void
+    {
+        // Create an existing ride with only 1 stop
+        $singleStopRide = Ride::create([
+            'driver_id' => $this->driver->id,
+            'vehicle_id' => $this->vehicle->id,
+            'origin_township' => 'Hlaing',
+            'destination_township' => 'Botahtaung',
+            'departure_time' => now()->addDays(2),
+            'total_seats' => 4,
+            'available_seats' => 4,
+            'price_per_seat' => 15.00,
+            'status' => 'scheduled',
+        ]);
+
+        RideStop::create([
+            'ride_id' => $singleStopRide->id,
+            'stop_name' => 'UIT',
+            'stop_order' => 1,
+            'estimated_time' => now()->addDays(2),
+        ]);
+
+        $this->assertCount(1, $singleStopRide->stops);
+
+        // Visiting show page will auto-backfill minimum 2 stops
+        $response = $this->actingAs($this->passenger)->get("/rides/{$singleStopRide->id}");
+        $response->assertOk();
+
+        $singleStopRide->refresh();
+        $this->assertGreaterThanOrEqual(2, $singleStopRide->stops->count());
+        $this->assertEquals('UIT', $singleStopRide->stops[0]->stop_name);
+        $this->assertEquals('Botahtaung (End)', $singleStopRide->stops[1]->stop_name);
     }
 }
