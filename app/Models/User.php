@@ -43,6 +43,8 @@ class User extends Authenticatable
         'profile_updates_this_month',
         'profile_update_reset_at',
         'pending_profile_data',
+        'is_blocked',
+        'blocked_reason',
     ];
 
     /**
@@ -69,6 +71,7 @@ class User extends Authenticatable
             'profile_update_reset_at' => 'datetime',
             'pending_profile_data' => 'array',
             'profile_updates_this_month' => 'integer',
+            'is_blocked' => 'boolean',
             'password' => 'hashed',
         ];
     }

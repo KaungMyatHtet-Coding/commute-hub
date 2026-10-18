@@ -5,9 +5,11 @@ namespace Tests\Feature;
 use App\Models\Ride;
 use App\Models\RideBooking;
 use App\Models\RideStop;
+use App\Models\SystemSetting;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -58,16 +60,64 @@ class AdminVerificationTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_admin_can_access_admin_dashboard_and_metrics(): void
+    public function test_admin_is_redirected_to_gate_without_passcode_verification(): void
     {
         $response = $this->actingAs($this->admin)->get('/admin');
+        $response->assertRedirect('/admin/gate');
+    }
+
+    public function test_admin_can_verify_passcode_at_gate(): void
+    {
+        // View gate
+        $this->actingAs($this->admin)
+            ->get('/admin/gate')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Admin/Gate'));
+
+        // Wrong passcode
+        $wrongResponse = $this->actingAs($this->admin)
+            ->post('/admin/gate', ['passcode' => 'wrongpasscode']);
+        $wrongResponse->assertSessionHasErrors('passcode');
+
+        // Correct default passcode ('admin1234')
+        $successResponse = $this->actingAs($this->admin)
+            ->post('/admin/gate', ['passcode' => 'admin1234']);
+        $successResponse->assertRedirect('/admin');
+        $this->assertTrue(session('admin_passcode_verified'));
+    }
+
+    public function test_admin_can_access_admin_dashboard_with_verified_passcode(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->get('/admin');
 
         $response->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Dashboard')
                 ->has('metrics')
-                ->has('recentCancellations')
+                ->has('tripOutcomes')
+                ->has('dailyUsage')
+                ->has('topDrivers')
+                ->has('lowRatedDrivers')
+                ->has('recentUnified')
             );
+    }
+
+    public function test_admin_can_update_admin_passcode(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->patch('/admin/passcode', [
+                'current_passcode' => 'admin1234',
+                'new_passcode' => 'newSecretPass99',
+                'new_passcode_confirmation' => 'newSecretPass99',
+            ]);
+
+        $response->assertSessionHas('success');
+
+        $setting = SystemSetting::where('key', 'admin_panel_passcode')->first();
+        $this->assertTrue(Hash::check('newSecretPass99', $setting->value));
     }
 
     public function test_passenger_can_submit_driver_application(): void
@@ -117,6 +167,7 @@ class AdminVerificationTest extends TestCase
 
         // Admin approves application
         $response = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
             ->patch("/admin/verifications/{$this->passenger->id}/approve");
 
         $response->assertSessionHas('success');
@@ -145,6 +196,7 @@ class AdminVerificationTest extends TestCase
 
         // Admin rejects application
         $response = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
             ->patch("/admin/verifications/{$this->passenger->id}/reject", [
                 'reason' => 'Expired driver license submitted.',
             ]);
@@ -155,6 +207,82 @@ class AdminVerificationTest extends TestCase
         $this->assertEquals('rejected', $passenger->driver_verification_status);
         $this->assertEquals('Expired driver license submitted.', $passenger->driver_rejection_reason);
         $this->assertFalse($passenger->hasRole('driver'));
+    }
+
+    public function test_admin_can_view_user_management_and_block_unblock_user(): void
+    {
+        $targetUser = User::factory()->create([
+            'name' => 'Suspicious Commuter',
+            'email' => 'suspicious@test.com',
+            'is_blocked' => false,
+        ]);
+        $targetUser->assignRole('passenger');
+
+        // Access users list
+        $listResp = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->get('/admin/users');
+
+        $listResp->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Users/Index')
+                ->has('users.data')
+                ->has('counts')
+            );
+
+        // Admin blocks user
+        $blockResp = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->patch("/admin/users/{$targetUser->id}/toggle-block", [
+                'reason' => 'Multiple reported violations of safety guidelines.',
+            ]);
+
+        $blockResp->assertSessionHas('success');
+        $this->assertTrue($targetUser->fresh()->is_blocked);
+        $this->assertEquals('Multiple reported violations of safety guidelines.', $targetUser->fresh()->blocked_reason);
+
+        // Blocked user attempting to access dashboard is logged out & redirected
+        $blockedAttempt = $this->actingAs($targetUser->fresh())
+            ->get('/dashboard');
+        $blockedAttempt->assertRedirect('/login');
+        $this->assertGuest();
+
+        // Admin unblocks user
+        $unblockResp = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->patch("/admin/users/{$targetUser->id}/toggle-block");
+
+        $unblockResp->assertSessionHas('success');
+        $this->assertFalse($targetUser->fresh()->is_blocked);
+        $this->assertNull($targetUser->fresh()->blocked_reason);
+    }
+
+    public function test_admin_can_view_ride_history_and_filters(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->get('/admin/history?status=all&township=Kamayut');
+
+        $response->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/History/Index')
+                ->has('rides.data')
+                ->has('summary')
+                ->has('townships')
+            );
+    }
+
+    public function test_public_welcome_landing_page_renders_with_cached_metrics(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Welcome')
+                ->has('metrics')
+                ->has('recentRides')
+                ->has('townships')
+            );
     }
 
     public function test_user_with_incomplete_kyc_is_redirected_to_profile(): void
@@ -228,6 +356,7 @@ class AdminVerificationTest extends TestCase
 
         // Admin approves profile update
         $adminResp = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
             ->patch("/admin/verifications/{$user->id}/profile-approve");
 
         $adminResp->assertSessionHas('success');
@@ -258,7 +387,9 @@ class AdminVerificationTest extends TestCase
             'seat_capacity' => 3,
         ]);
 
-        $adminResponse = $this->actingAs($this->admin)->get('/admin/verifications?status=pending');
+        $adminResponse = $this->actingAs($this->admin)
+            ->withSession(['admin_passcode_verified' => true])
+            ->get('/admin/verifications?status=pending');
         $adminResponse->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Admin/Verifications/Index')
@@ -266,4 +397,3 @@ class AdminVerificationTest extends TestCase
             );
     }
 }
-

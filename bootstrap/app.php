@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
+            \App\Http\Middleware\CheckUserNotBlocked::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'kyc.completed' => \App\Http\Middleware\EnsureKycCompleted::class,
+            'admin.passcode' => \App\Http\Middleware\AdminPasscodeMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
