@@ -42,30 +42,45 @@ class DriverApplicationController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        DB::transaction(function () use ($user, $validated) {
-            // Update user's driver verification status and license number
+        $licensePhotoPath = $request->hasFile('driver_license_photo')
+            ? $request->file('driver_license_photo')->store('driver_documents', 'public')
+            : $user->driver_license_photo_path;
+
+        $vehiclePhotoPath = $request->hasFile('vehicle_photo')
+            ? $request->file('vehicle_photo')->store('vehicle_documents', 'public')
+            : null;
+
+        DB::transaction(function () use ($user, $validated, $licensePhotoPath, $vehiclePhotoPath) {
+            // Update user's driver verification status, license number, and license photo
             $user->update([
                 'driver_license_number' => $validated['driver_license_number'],
+                'driver_license_photo_path' => $licensePhotoPath,
                 'driver_verification_status' => 'pending_verification',
                 'driver_applied_at' => now(),
                 'driver_rejection_reason' => null,
             ]);
 
             // Create or update vehicle associated with user
+            $vehicleData = [
+                'make' => $validated['make'],
+                'model' => $validated['model'],
+                'color' => $validated['color'] ?? null,
+                'manufacture_year' => !empty($validated['manufacture_year']) ? (int) $validated['manufacture_year'] : null,
+                'seat_capacity' => (int) $validated['seat_capacity'],
+                'is_active' => true,
+                'is_verified' => false,
+            ];
+
+            if ($vehiclePhotoPath) {
+                $vehicleData['vehicle_photo_path'] = $vehiclePhotoPath;
+            }
+
             Vehicle::updateOrCreate(
                 [
                     'user_id' => $user->id,
                     'license_plate' => strtoupper(trim($validated['license_plate'])),
                 ],
-                [
-                    'make' => $validated['make'],
-                    'model' => $validated['model'],
-                    'color' => $validated['color'] ?? null,
-                    'manufacture_year' => $validated['manufacture_year'] ?? null,
-                    'seat_capacity' => $validated['seat_capacity'],
-                    'is_active' => true,
-                    'is_verified' => false,
-                ]
+                $vehicleData
             );
         });
 

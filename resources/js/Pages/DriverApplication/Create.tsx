@@ -3,8 +3,8 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import { Head, useForm, Link } from '@inertiajs/react';
-import React from 'react';
+import { Head, useForm, usePage, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
 
 interface Props {
     status: 'not_applied' | 'pending' | 'pending_verification' | 'verified' | 'rejected' | string;
@@ -16,27 +16,68 @@ interface Props {
         manufacture_year?: number | null;
         license_plate: string;
         seat_capacity: number;
+        vehicle_photo_path?: string | null;
     } | null;
     driverLicenseNumber?: string | null;
 }
 
 export default function Create({ status, rejectionReason, existingVehicle, driverLicenseNumber }: Props) {
+    const user = usePage().props.auth.user;
     const isPending = status === 'pending_verification' || status === 'pending';
     const isRejected = status === 'rejected';
 
-    const { data, setData, post, processing, errors } = useForm({
-        driver_license_number: driverLicenseNumber || '',
+    const [previews, setPreviews] = useState<{
+        driver_license_photo?: string | null;
+        vehicle_photo?: string | null;
+    }>({
+        driver_license_photo: user.driver_license_photo_path ? `/storage/${user.driver_license_photo_path}` : null,
+        vehicle_photo: existingVehicle?.vehicle_photo_path ? `/storage/${existingVehicle.vehicle_photo_path}` : null,
+    });
+
+    const [fileNames, setFileNames] = useState<{
+        driver_license_photo?: string;
+        vehicle_photo?: string;
+    }>({});
+
+    const { data, setData, post, processing, errors } = useForm<{
+        driver_license_number: string;
+        driver_license_photo: File | null;
+        make: string;
+        model: string;
+        color: string;
+        manufacture_year: string;
+        license_plate: string;
+        vehicle_photo: File | null;
+        seat_capacity: string;
+    }>({
+        driver_license_number: driverLicenseNumber || user.driver_license_number || '',
+        driver_license_photo: null,
         make: existingVehicle?.make || '',
         model: existingVehicle?.model || '',
         color: existingVehicle?.color || '',
         manufacture_year: existingVehicle?.manufacture_year ? String(existingVehicle.manufacture_year) : '',
         license_plate: existingVehicle?.license_plate || '',
+        vehicle_photo: null,
         seat_capacity: existingVehicle?.seat_capacity ? String(existingVehicle.seat_capacity) : '4',
     });
 
+    const handleFileChange = (field: 'driver_license_photo' | 'vehicle_photo', file: File | null) => {
+        setData(field, file);
+        setFileNames((prev) => ({ ...prev, [field]: file?.name }));
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setPreviews((prev) => ({ ...prev, [field]: e.target?.result as string }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('driver-application.store'));
+        post(route('driver-application.store'), {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -106,48 +147,134 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                         </div>
                     )}
 
-                    {/* Application Form */}
+                    {/* Step A: Read-Only Verified KYC Safety Information (Anti-Spoofing) */}
+                    <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-100">
+                        <div className="border-b border-gray-100 bg-indigo-50/50 px-8 py-5">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                        Step 1 of 2: Verified Identity
+                                    </span>
+                                    <h3 className="text-base font-bold text-gray-900">
+                                        Your Passenger KYC Information (Locked)
+                                    </h3>
+                                </div>
+                                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                                    ✓ Anti-Spoofing Protected
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="p-8">
+                            <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100">
+                                {user.passport_photo_path ? (
+                                    <img
+                                        src={`/storage/${user.passport_photo_path}`}
+                                        alt={user.name}
+                                        className="h-20 w-20 rounded-2xl object-cover ring-2 ring-indigo-500 shadow"
+                                    />
+                                ) : (
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700 font-bold text-2xl shadow">
+                                        {user.name.charAt(0)}
+                                    </div>
+                                )}
+                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <span className="text-gray-400 uppercase tracking-wider block">Legal Name</span>
+                                        <span className="font-bold text-gray-900 text-sm">{user.name}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-400 uppercase tracking-wider block">Email Address</span>
+                                        <span className="font-semibold text-gray-800">{user.email}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-400 uppercase tracking-wider block">Phone Number</span>
+                                        <span className="font-semibold text-gray-800">{user.phone || 'N/A'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-400 uppercase tracking-wider block">NRC Number</span>
+                                        <span className="font-mono font-bold text-indigo-700">{user.nrc_number || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="mt-3 text-xs text-gray-400">
+                                To update personal details, please edit your <Link href={route('profile.edit')} className="text-indigo-600 underline">Profile KYC page</Link>.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Step B: Driver License & Vehicle Details Form */}
                     <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-gray-100">
                         <div className="border-b border-gray-100 bg-gray-50/70 px-8 py-5">
-                            <h3 className="text-base font-bold text-gray-900">Driver & Vehicle Verification</h3>
-                            <p className="mt-0.5 text-xs text-gray-500">
-                                Please provide accurate details. All information is verified by administrators before ride creation is enabled.
-                            </p>
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                Step 2 of 2: Driver & Vehicle Registration
+                            </span>
+                            <h3 className="text-base font-bold text-gray-900">Driver License & Vehicle Details</h3>
                         </div>
 
                         <form onSubmit={submit} className="p-8 space-y-8">
-                            {/* Section 1: Personal Identification */}
+                            {/* Section 1: Driver License Details & Photo */}
                             <div>
                                 <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600">
                                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs text-indigo-700">1</span>
-                                    Driver Identification
+                                    Driver License Details & Card Photo
                                 </h4>
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div className="sm:col-span-2">
-                                        <InputLabel htmlFor="driver_license_number" value="Driver License / National ID (NID) Number" />
+                                        <InputLabel htmlFor="driver_license_number" value="Driver License Number" />
                                         <TextInput
                                             id="driver_license_number"
                                             name="driver_license_number"
                                             value={data.driver_license_number}
-                                            className="mt-1 block w-full rounded-xl"
-                                            placeholder="e.g. B-1234567 or 12/LAMATA(N)123456"
+                                            className="mt-1 block w-full rounded-xl uppercase font-mono"
+                                            placeholder="e.g. B-1234567 or MM-YGN-DR-10001"
                                             onChange={(e) => setData('driver_license_number', e.target.value)}
                                             required
                                             disabled={isPending}
                                         />
                                         <InputError message={errors.driver_license_number} className="mt-2" />
-                                        <p className="mt-1 text-xs text-gray-400">
-                                            This is strictly used for safety verification and kept confidential.
-                                        </p>
+                                    </div>
+
+                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 p-4">
+                                        <InputLabel value="Driver License Card Photo (Required for Driver Verification)" />
+                                        <div className="mt-2 flex items-center gap-3">
+                                            {previews.driver_license_photo ? (
+                                                <img
+                                                    src={previews.driver_license_photo}
+                                                    alt="Driver License Card"
+                                                    className="h-16 w-24 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
+                                                />
+                                            ) : (
+                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                                    <span className="text-[10px] font-bold">License Card</span>
+                                                </div>
+                                            )}
+                                            <div className="min-w-0 flex-1">
+                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                                                    Choose Photo
+                                                    <input
+                                                        type="file"
+                                                        accept="image/jpeg,image/png,image/webp"
+                                                        onChange={(e) => handleFileChange('driver_license_photo', e.target.files?.[0] || null)}
+                                                        disabled={isPending}
+                                                        className="hidden"
+                                                    />
+                                                </label>
+                                                <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.driver_license_photo || undefined}>
+                                                    {fileNames.driver_license_photo || (user.driver_license_photo_path ? 'Current license photo saved' : 'No file chosen')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <InputError message={errors.driver_license_photo} className="mt-2" />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Section 2: Vehicle Details */}
+                            {/* Section 2: Vehicle Details & Photo */}
                             <div className="border-t border-gray-100 pt-6">
                                 <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-indigo-600">
                                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs text-indigo-700">2</span>
-                                    Vehicle Information
+                                    Vehicle Specifications & Photo
                                 </h4>
                                 <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
                                     <div>
@@ -172,7 +299,7 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                             name="model"
                                             value={data.model}
                                             className="mt-1 block w-full rounded-xl"
-                                            placeholder="e.g. Prius, Fit, AD Van"
+                                            placeholder="e.g. Prius, Fit, Probox"
                                             onChange={(e) => setData('model', e.target.value)}
                                             required
                                             disabled={isPending}
@@ -227,21 +354,57 @@ export default function Create({ status, rejectionReason, existingVehicle, drive
                                     </div>
 
                                     <div>
-                                        <InputLabel htmlFor="seat_capacity" value="Passenger Seat Capacity (excl. driver)" />
-                                        <TextInput
+                                        <InputLabel htmlFor="seat_capacity" value="Passenger Seat Capacity" />
+                                        <select
                                             id="seat_capacity"
-                                            type="number"
                                             name="seat_capacity"
                                             value={data.seat_capacity}
-                                            className="mt-1 block w-full rounded-xl"
-                                            min="1"
-                                            max="8"
+                                            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                                             onChange={(e) => setData('seat_capacity', e.target.value)}
                                             required
                                             disabled={isPending}
-                                        />
+                                        >
+                                            {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                                                <option key={num} value={num}>
+                                                    {num} {num === 1 ? 'seat' : 'seats'}
+                                                </option>
+                                            ))}
+                                        </select>
                                         <InputError message={errors.seat_capacity} className="mt-2" />
                                         <p className="mt-1 text-xs text-gray-400">Available seats for passengers (typically 1–4).</p>
+                                    </div>
+
+                                    <div className="sm:col-span-2 overflow-hidden rounded-2xl border border-gray-200 p-4">
+                                        <InputLabel value="Vehicle Photo (Clearly showing license plate number)" />
+                                        <div className="mt-2 flex items-center gap-3">
+                                            {previews.vehicle_photo ? (
+                                                <img
+                                                    src={previews.vehicle_photo}
+                                                    alt="Vehicle Preview"
+                                                    className="h-16 w-24 shrink-0 rounded-xl object-cover ring-2 ring-indigo-500"
+                                                />
+                                            ) : (
+                                                <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-400">
+                                                    <span className="text-[10px] font-bold">Vehicle Photo</span>
+                                                </div>
+                                            )}
+                                            <div className="min-w-0 flex-1">
+                                                <label className={`inline-flex cursor-pointer items-center rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition shadow-sm ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                                                    Choose Photo
+                                                    <input
+                                                        type="file"
+                                                        accept="image/jpeg,image/png,image/webp"
+                                                        onChange={(e) => handleFileChange('vehicle_photo', e.target.files?.[0] || null)}
+                                                        disabled={isPending}
+                                                        className="hidden"
+                                                    />
+                                                </label>
+                                                <span className="mt-1 block truncate text-xs text-gray-500" title={fileNames.vehicle_photo || undefined}>
+                                                    {fileNames.vehicle_photo || (existingVehicle?.vehicle_photo_path ? 'Current vehicle photo saved' : 'No file chosen')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <InputError message={errors.vehicle_photo} className="mt-2" />
                                     </div>
                                 </div>
                             </div>

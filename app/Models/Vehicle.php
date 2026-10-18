@@ -9,11 +9,14 @@ class Vehicle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'make', 'model', 'color', 'manufacture_year', 'license_plate', 'seat_capacity', 'is_active', 'is_verified'];
+    protected $fillable = ['user_id', 'make', 'model', 'color', 'manufacture_year', 'license_plate', 'seat_capacity', 'is_active', 'is_verified', 'vehicle_photo_path'];
 
     protected function casts(): array
     {
         return [
+            'user_id' => 'integer',
+            'manufacture_year' => 'integer',
+            'seat_capacity' => 'integer',
             'is_active' => 'boolean',
             'is_verified' => 'boolean',
         ];

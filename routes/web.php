@@ -24,24 +24,31 @@ Route::middleware('auth')->group(function () {
     // Ride discovery (all authenticated users)
     Route::get('/rides', [RideController::class, 'index'])->name('rides.index');
 
-    // Ride management (drivers) — must be before /{ride} wildcard
-    Route::get('/rides/create', [RideController::class, 'create'])->name('rides.create');
-    Route::post('/rides', [RideController::class, 'store'])->name('rides.store');
+    // KYC Protected routes: Ride creation, Ride booking, Driver application
+    Route::middleware('kyc.completed')->group(function () {
+        // Ride management (drivers) — must be before /{ride} wildcard
+        Route::get('/rides/create', [RideController::class, 'create'])->name('rides.create');
+        Route::post('/rides', [RideController::class, 'store'])->middleware('throttle:10,1')->name('rides.store');
 
-    // Ride detail — wildcard last so "create" isn't swallowed
+        // Trip lifecycle (driver)
+        Route::patch('/rides/{ride}/start', [\App\Http\Controllers\RideStatusController::class, 'start'])->name('rides.start');
+        Route::patch('/rides/{ride}/complete', [\App\Http\Controllers\RideStatusController::class, 'complete'])->name('rides.complete');
+        Route::patch('/rides/{ride}/cancel', [\App\Http\Controllers\RideStatusController::class, 'cancel'])->name('rides.cancel');
+
+        // Booking management
+        Route::post('/rides/{ride}/bookings', [RideBookingController::class, 'store'])->middleware('throttle:10,1')->name('rides.bookings.store');
+        Route::patch('/bookings/{booking}/accept', [RideBookingController::class, 'accept'])->name('bookings.accept');
+        Route::patch('/bookings/{booking}/reject', [RideBookingController::class, 'reject'])->name('bookings.reject');
+        Route::patch('/bookings/{booking}/cancel', [RideBookingController::class, 'cancel'])->name('bookings.cancel');
+        Route::delete('/bookings/{booking}', [RideBookingController::class, 'cancel'])->name('bookings.destroy');
+
+        // Driver application (passenger view)
+        Route::get('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'create'])->name('driver-application.create');
+        Route::post('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'store'])->middleware('throttle:10,1')->name('driver-application.store');
+    });
+
+    // Ride detail — accessible for viewing
     Route::get('/rides/{ride}', [RideController::class, 'show'])->name('rides.show');
-
-    // Trip lifecycle (driver)
-    Route::patch('/rides/{ride}/start', [\App\Http\Controllers\RideStatusController::class, 'start'])->name('rides.start');
-    Route::patch('/rides/{ride}/complete', [\App\Http\Controllers\RideStatusController::class, 'complete'])->name('rides.complete');
-    Route::patch('/rides/{ride}/cancel', [\App\Http\Controllers\RideStatusController::class, 'cancel'])->name('rides.cancel');
-
-    // Booking management
-    Route::post('/rides/{ride}/bookings', [RideBookingController::class, 'store'])->name('rides.bookings.store');
-    Route::patch('/bookings/{booking}/accept', [RideBookingController::class, 'accept'])->name('bookings.accept');
-    Route::patch('/bookings/{booking}/reject', [RideBookingController::class, 'reject'])->name('bookings.reject');
-    Route::patch('/bookings/{booking}/cancel', [RideBookingController::class, 'cancel'])->name('bookings.cancel');
-    Route::delete('/bookings/{booking}', [RideBookingController::class, 'cancel'])->name('bookings.destroy');
 
     // Mutual Reviews & Ratings
     Route::post('/bookings/{booking}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('bookings.reviews.store');
@@ -49,12 +56,9 @@ Route::middleware('auth')->group(function () {
     // My Trips (dual driver/passenger trips view)
     Route::get('/trips', [\App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
 
-    // Driver application (passenger view)
-    Route::get('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'create'])->name('driver-application.create');
-    Route::post('/driver-application', [\App\Http\Controllers\DriverApplicationController::class, 'store'])->name('driver-application.store');
-
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1')->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])->middleware('throttle:10,1');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -64,6 +68,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/verifications', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'index'])->name('verifications.index');
     Route::patch('/verifications/{user}/approve', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'approve'])->name('verifications.approve');
     Route::patch('/verifications/{user}/reject', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'reject'])->name('verifications.reject');
+    Route::patch('/verifications/{user}/profile-approve', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'approveProfileUpdate'])->name('verifications.profile.approve');
+    Route::patch('/verifications/{user}/profile-reject', [\App\Http\Controllers\Admin\DriverVerificationController::class, 'rejectProfileUpdate'])->name('verifications.profile.reject');
 });
 
 

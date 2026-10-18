@@ -3,7 +3,7 @@ import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import UpdateKycInformationForm from './Partials/UpdateKycInformationForm';
 
 export default function Edit({
     mustVerifyEmail,
@@ -21,15 +21,11 @@ export default function Edit({
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
+                    <div className="bg-white p-4 shadow sm:rounded-2xl sm:p-8 ring-1 ring-gray-100">
+                        <UpdateKycInformationForm className="max-w-2xl" />
                     </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
+                    <div className="bg-white p-4 shadow sm:rounded-2xl sm:p-8 ring-1 ring-gray-100">
                         <UpdatePasswordForm className="max-w-xl" />
                     </div>
 

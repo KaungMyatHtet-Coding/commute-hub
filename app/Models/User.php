@@ -22,13 +22,27 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
+        'gender',
+        'nrc_number',
+        'nrc_front_path',
+        'nrc_back_path',
+        'passport_photo_path',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'payment_qr_path',
+        'kyc_status',
+        'kyc_rejection_reason',
         'driver_license_number',
         'driver_license_document_path',
+        'driver_license_photo_path',
         'driver_verification_status',
         'driver_rejection_reason',
         'driver_applied_at',
         'driver_verified_at',
         'driver_verified_by',
+        'profile_updates_this_month',
+        'profile_update_reset_at',
+        'pending_profile_data',
     ];
 
     /**
@@ -39,7 +53,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'driver_license_number',
     ];
 
     /**
@@ -53,6 +66,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'driver_applied_at' => 'datetime',
             'driver_verified_at' => 'datetime',
+            'profile_update_reset_at' => 'datetime',
+            'pending_profile_data' => 'array',
+            'profile_updates_this_month' => 'integer',
             'password' => 'hashed',
         ];
     }

@@ -15,11 +15,13 @@ class StoreDriverApplicationRequest extends FormRequest
     {
         return [
             'driver_license_number' => ['required', 'string', 'max:50'],
+            'driver_license_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'make' => ['required', 'string', 'max:80'],
             'model' => ['required', 'string', 'max:80'],
             'color' => ['nullable', 'string', 'max:50'],
             'manufacture_year' => ['nullable', 'integer', 'min:1990', 'max:' . (date('Y') + 1)],
             'license_plate' => ['required', 'string', 'max:30'],
+            'vehicle_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'seat_capacity' => ['required', 'integer', 'min:1', 'max:8'],
         ];
     }

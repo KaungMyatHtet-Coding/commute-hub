@@ -26,6 +26,15 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'phone' => ['required', 'string', 'max:30'],
+            'gender' => ['required', 'string', 'in:male,female,other'],
+            'nrc_number' => ['required', 'string', 'max:50'],
+            'emergency_contact_name' => ['required', 'string', 'max:100'],
+            'emergency_contact_phone' => ['required', 'string', 'max:30'],
+            'passport_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'nrc_front' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'nrc_back' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'payment_qr' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 }

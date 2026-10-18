@@ -23,13 +23,20 @@ class ProfileTest extends TestCase
 
     public function test_profile_information_can_be_updated(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'kyc_status' => 'incomplete',
+        ]);
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
+                'phone' => '09123456789',
+                'gender' => 'male',
+                'nrc_number' => '12/LAMATA(N)111222',
+                'emergency_contact_name' => 'John Doe',
+                'emergency_contact_phone' => '09987654321',
             ]);
 
         $response
@@ -40,18 +47,28 @@ class ProfileTest extends TestCase
 
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
+        $this->assertSame('09123456789', $user->phone);
+        $this->assertSame('12/LAMATA(N)111222', $user->nrc_number);
+        $this->assertSame('verified', $user->kyc_status);
         $this->assertNull($user->email_verified_at);
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'kyc_status' => 'incomplete',
+        ]);
 
         $response = $this
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
                 'email' => $user->email,
+                'phone' => '09123456789',
+                'gender' => 'male',
+                'nrc_number' => '12/LAMATA(N)111222',
+                'emergency_contact_name' => 'John Doe',
+                'emergency_contact_phone' => '09987654321',
             ]);
 
         $response
