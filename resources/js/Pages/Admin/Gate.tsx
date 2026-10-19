@@ -65,12 +65,6 @@ export default function AdminGate() {
                             >
                                 {processing ? 'Verifying...' : 'Unlock Admin Panel'}
                             </button>
-
-                            <div className="rounded-xl border border-indigo-100 dark:border-indigo-900/40 bg-indigo-50/60 dark:bg-indigo-900/20 p-3 text-center">
-                                <p className="text-[11px] text-indigo-700 dark:text-indigo-400 font-mono">
-                                    Default demo passcode: <span className="font-bold underline">admin1234</span>
-                                </p>
-                            </div>
                         </form>
                     </div>
                 </div>

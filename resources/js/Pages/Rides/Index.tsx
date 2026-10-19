@@ -1,5 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { RIDE_RULES, YANGON_TOWNSHIPS } from '@/Constants/yangonTownships';
+import { useLanguage } from '@/Contexts/LanguageContext';
 import { Head, Link, router } from '@inertiajs/react';
 import React, { FormEvent, useState } from 'react';
 
@@ -111,6 +112,7 @@ function StopTag({ stop }: { stop: RideStop }) {
 }
 
 function RideCard({ ride }: { ride: Ride }) {
+    const { getTownshipName } = useLanguage();
     const isLadiesOnly = ride.ride_rules?.includes('ladies_only');
 
     return (
@@ -127,13 +129,13 @@ function RideCard({ ride }: { ride: Ride }) {
                 <div className="flex items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-slate-800">
                     <div className="flex items-center gap-2 flex-wrap">
                         <span className="rounded-xl bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 text-xs font-black text-indigo-700 dark:text-indigo-400">
-                            {ride.origin_township}
+                            {getTownshipName(ride.origin_township)}
                         </span>
                         <svg className="h-4 w-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                         </svg>
                         <span className="rounded-xl bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 text-xs font-black text-indigo-700 dark:text-indigo-400">
-                            {ride.destination_township}
+                            {getTownshipName(ride.destination_township)}
                         </span>
                     </div>
 
@@ -251,6 +253,7 @@ function RideCard({ ride }: { ride: Ride }) {
 // ─── Main Index Page ─────────────────────────────────────────────────────────
 
 export default function RidesIndex({ rides, stopNames, townships, filters }: Props) {
+    const { getTownshipName } = useLanguage();
     const townshipList = townships && townships.length > 0 ? townships : YANGON_TOWNSHIPS;
 
     const [originTownship, setOriginTownship] = useState(filters.origin_township ?? '');
@@ -334,7 +337,7 @@ export default function RidesIndex({ rides, stopNames, townships, filters }: Pro
                                         <option value="">All Townships</option>
                                         {townshipList.map((t) => (
                                             <option key={t} value={t}>
-                                                {t}
+                                                {getTownshipName(t)}
                                             </option>
                                         ))}
                                     </select>
@@ -365,7 +368,7 @@ export default function RidesIndex({ rides, stopNames, townships, filters }: Pro
                                         <option value="">All Townships</option>
                                         {townshipList.map((t) => (
                                             <option key={t} value={t}>
-                                                {t}
+                                                {getTownshipName(t)}
                                             </option>
                                         ))}
                                     </select>

@@ -1,10 +1,12 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import FlashToast from '@/Components/FlashToast';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import ThemeToggle from '@/Components/ThemeToggle';
+import { useLanguage } from '@/Contexts/LanguageContext';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
@@ -12,6 +14,7 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
+    const { t } = useLanguage();
     const { auth } = usePage().props;
     const user = auth.user;
 
@@ -41,7 +44,7 @@ export default function Authenticated({
                             {/* Desktop nav links */}
                             <div className="hidden space-x-1 sm:-my-px sm:ms-6 sm:flex sm:items-center">
                                 <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
+                                    {t('nav.dashboard')}
                                 </NavLink>
 
                                 {route().has('rides.index') && (
@@ -49,13 +52,13 @@ export default function Authenticated({
                                         href={route('rides.index')}
                                         active={route().current('rides.index') || route().current('rides.show')}
                                     >
-                                        Find a Ride
+                                        {t('nav.find_ride')}
                                     </NavLink>
                                 )}
 
                                 {route().has('bookings.index') && (
                                     <NavLink href={route('bookings.index')} active={route().current('bookings.index')}>
-                                        My Trips
+                                        {t('nav.my_trips')}
                                     </NavLink>
                                 )}
 
@@ -65,7 +68,7 @@ export default function Authenticated({
                                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                                             </svg>
-                                            Offer a Ride
+                                            {t('nav.offer_ride')}
                                         </span>
                                     </NavLink>
                                 ) : (
@@ -78,7 +81,7 @@ export default function Authenticated({
                                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            Become a Driver
+                                            {t('nav.become_driver')}
                                         </span>
                                     </NavLink>
                                 )}
@@ -90,7 +93,7 @@ export default function Authenticated({
                                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                                                 </svg>
-                                                Admin
+                                                {t('nav.admin_panel')}
                                             </span>
                                         </NavLink>
                                         <NavLink href={route('admin.users.index')} active={route().current('admin.users.*')}>
@@ -107,8 +110,9 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        {/* Right: Theme toggle, notification, user dropdown */}
+                        {/* Right: Language switcher, theme toggle, notification, user dropdown */}
                         <div className="hidden sm:ms-6 sm:flex sm:items-center sm:gap-2">
+                            <LanguageSwitcher />
                             <ThemeToggle />
                             <NotificationBell />
 
@@ -140,20 +144,20 @@ export default function Authenticated({
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                        <Dropdown.Link href={route('profile.edit')}>{t('nav.profile')}</Dropdown.Link>
                                         {isAdmin && (
-                                            <Dropdown.Link href={route('admin.dashboard')}>Admin Panel</Dropdown.Link>
+                                            <Dropdown.Link href={route('admin.dashboard')}>{t('nav.admin_panel')}</Dropdown.Link>
                                         )}
                                         {route().has('bookings.index') && (
-                                            <Dropdown.Link href={route('bookings.index')}>My Trips</Dropdown.Link>
+                                            <Dropdown.Link href={route('bookings.index')}>{t('nav.my_trips')}</Dropdown.Link>
                                         )}
                                         {isDriver ? (
-                                            <Dropdown.Link href={route('rides.create')}>Offer a Ride</Dropdown.Link>
+                                            <Dropdown.Link href={route('rides.create')}>{t('nav.offer_ride')}</Dropdown.Link>
                                         ) : (
-                                            <Dropdown.Link href={route('driver-application.create')}>Become a Driver</Dropdown.Link>
+                                            <Dropdown.Link href={route('driver-application.create')}>{t('nav.become_driver')}</Dropdown.Link>
                                         )}
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
+                                            {t('nav.logout')}
                                         </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
@@ -162,6 +166,7 @@ export default function Authenticated({
 
                         {/* Hamburger & Mobile right controls */}
                         <div className="-me-2 flex items-center gap-1 sm:hidden">
+                            <LanguageSwitcher />
                             <ThemeToggle className="h-8 w-8" />
                             <NotificationBell />
                             <button
@@ -189,12 +194,12 @@ export default function Authenticated({
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden animate-slide-down'}>
                     <div className="space-y-1 pb-3 pt-2 border-t border-gray-100 dark:border-slate-800">
                         <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
+                            {t('nav.dashboard')}
                         </ResponsiveNavLink>
 
                         {isAdmin && (
                             <ResponsiveNavLink href={route('admin.dashboard')} active={route().current('admin.*')}>
-                                Admin Panel
+                                {t('nav.admin_panel')}
                             </ResponsiveNavLink>
                         )}
 
@@ -203,23 +208,23 @@ export default function Authenticated({
                                 href={route('rides.index')}
                                 active={route().current('rides.index') || route().current('rides.show')}
                             >
-                                Find a Ride
+                                {t('nav.find_ride')}
                             </ResponsiveNavLink>
                         )}
 
                         {route().has('bookings.index') && (
                             <ResponsiveNavLink href={route('bookings.index')} active={route().current('bookings.index')}>
-                                My Trips
+                                {t('nav.my_trips')}
                             </ResponsiveNavLink>
                         )}
 
                         {isDriver ? (
                             <ResponsiveNavLink href={route('rides.create')} active={route().current('rides.create')}>
-                                Offer a Ride
+                                {t('nav.offer_ride')}
                             </ResponsiveNavLink>
                         ) : (
                             <ResponsiveNavLink href={route('driver-application.create')} active={route().current('driver-application.*')}>
-                                Become a Driver
+                                {t('nav.become_driver')}
                             </ResponsiveNavLink>
                         )}
 
@@ -258,8 +263,8 @@ export default function Authenticated({
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">Log Out</ResponsiveNavLink>
+                            <ResponsiveNavLink href={route('profile.edit')}>{t('nav.profile')}</ResponsiveNavLink>
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button">{t('nav.logout')}</ResponsiveNavLink>
                         </div>
                     </div>
                 </div>
@@ -296,7 +301,7 @@ export default function Authenticated({
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={route().current('dashboard') ? 2.5 : 1.8} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
-                        Home
+                        {t('nav.home')}
                     </Link>
 
                     {/* Find a Ride */}
@@ -312,7 +317,7 @@ export default function Authenticated({
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            Find
+                            {t('nav.find_ride')}
                         </Link>
                     )}
 
@@ -331,7 +336,7 @@ export default function Authenticated({
                             </svg>
                         </div>
                         <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
-                            {isDriver ? 'Offer' : 'Drive'}
+                            {isDriver ? t('nav.offer_ride') : t('nav.become_driver')}
                         </span>
                     </Link>
 
@@ -348,7 +353,7 @@ export default function Authenticated({
                             <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            My Trips
+                            {t('nav.my_trips')}
                         </Link>
                     )}
 
@@ -370,7 +375,7 @@ export default function Authenticated({
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                         )}
-                        {isAdmin ? 'Admin' : 'Profile'}
+                        {isAdmin ? 'Admin' : t('nav.profile')}
                     </Link>
                 </div>
             </nav>
