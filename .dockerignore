@@ -1,0 +1,17 @@
+node_modules
+.git
+.github
+.env
+.env.backup
+.env.production
+tests
+storage/*.key
+storage/logs/*.log
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+npm-debug.log
+yarn-error.log
+.idea
+.vscode
+.phpunit.result.cache
