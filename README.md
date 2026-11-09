@@ -54,17 +54,7 @@ Built with **Laravel 11**, **Inertia.js**, **React 18**, **TypeScript**, and **T
 
 ---
 
-## 👥 Demo Accounts & Pre-Seeded Credentials
 
-All seeded accounts share the default password: `password`.
-
-| Role | Email | Password | Secondary Passcode | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **System Admin** | `admin@commutehub.test` | `password` | `admin1234` | Full access to Admin Panel, Verifications & User Management |
-| **Verified Driver** | `aung.min@commutehub.test` | `password` | *N/A* | Verified driver (Toyota Probox, Kamayut ⇄ Kyauktada) |
-| **Verified Driver (Ladies Only)** | `susu.win@commutehub.test` | `password` | *N/A* | Verified driver (Honda Fit, Insein ⇄ Bahan, Ladies Only) |
-| **Commuter Passenger** | `ko.htet@commutehub.test` | `password` | *N/A* | Verified passenger with active booking |
-| **Commuter Passenger** | `may.zin@commutehub.test` | `password` | *N/A* | Verified passenger with active booking |
 
 ---
 
